@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>平板電腦登記表單</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
+    label { display: block; margin: 10px 0 5px; }
+    input, select, textarea { width: 100%; padding: 8px; margin-bottom: 10px; }
+    button { padding: 10px 20px; background: #4CAF50; color: white; border: none; cursor: pointer; }
+    button:hover { background: #45a049; }
+    #otherReason { display: none; }
+  </style>
+</head>
+<body>
+  <h2>平板電腦登記表單</h2>
+  <form id="tabletForm">
+    <label for="submissionDate">提交日期和時間</label>
+    <input type="text" id="submissionDate" name="submissionDate" readonly>
+
+    <label for="className">班級</label>
+    <select id="className" name="className" required>
+      <option value="">請選擇班級</option>
+      <option value="1A">1A</option>
+      <option value="1B">1B</option>
+      <option value="1C">1C</option>
+      <option value="2A">2A</option>
+      <option value="2B">2B</option>
+      <option value="2C">2C</option>
+      <option value="3A">3A</option>
+      <option value="3B">3B</option>
+      <option value="3C">3C</option>
+      <option value="4A">4A</option>
+      <option value="4B">4B</option>
+      <option value="4C">4C</option>
+      <option value="5A">5A</option>
+      <option value="5B">5B</option>
+      <option value="5C">5C</option>
+      <option value="6A">6A</option>
+      <option value="6B">6B</option>
+      <option value="6C">6C</option>
+    </select>
+
+    <label for="registrationType">登記類型</label>
+    <select id="registrationType" name="registrationType" required>
+      <option value="">請選擇類型</option>
+      <option value="領取">領取</option>
+      <option value="歸還">歸還</option>
+      <option value="故障">故障</option>
+    </select>
+
+    <label for="otherReason">其他原因</label>
+    <textarea id="otherReason" name="otherReason" placeholder="如選擇故障，請說明問題"></textarea>
+
+    <label for="quantity">數量</label>
+    <input type="number" id="quantity" name="quantity" min="1" required>
+
+    <label for="remarks">備註</label>
+    <textarea id="remarks" name="remarks" placeholder="其他補充信息"></textarea>
+
+    <button type="submit">提交</button>
+  </form>
+
+  <script>
+    // 自動設置日期和時間
+    function setDateTime() {
+      const now = new Date();
+      const formattedDate = now.toISOString().replace('T', ' ').slice(0, 19);
+      document.getElementById("submissionDate").value = formattedDate;
+    }
+    setDateTime();
+
+    // 動態控制其他原因欄位
+    document.getElementById("registrationType").addEventListener("change", function() {
+      const otherReasonField = document.getElementById("otherReason");
+      otherReasonField.style.display = this.value === "故障" ? "block" : "none";
+      otherReasonField.required = this.value === "故障";
+      if (this.value !== "故障") otherReasonField.value = "";
+    });
+
+    // 表單提交
+    document.getElementById("tabletForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const formData = {
+        submissionDate: document.getElementById("submissionDate").value,
+        className: document.getElementById("className").value,
+        registrationType: document.getElementById("registrationType").value,
+        otherReason: document.getElementById("otherReason").value,
+        quantity: document.getElementById("quantity").value,
+        remarks: document.getElementById("remarks").value
+      };
+      fetch("https://script.google.com/a/macros/itedu.clbss.edu.hk/s/AKfycbyvxHcu64pot3jULbqIL6mHbkqx1s2QXm_w8BdDxkNqfYShDhzLJAcwQ1QR8e2d6svy/exec", {
+        method: "POST",
+        body: JSON.stringify(formData),
+        headers: { "Content-Type": "application/json" }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.status === "success") {
+          window.location.href = "success.html"; // 導向成功頁面
+        } else {
+          window.location.href = "error.html?message=" + encodeURIComponent(data.message); // 導向失敗頁面並傳遞錯誤訊息
+        }
+      })
+      .catch(error => {
+        window.location.href = "error.html?message=" + encodeURIComponent(error); // 捕獲異常導向失敗頁面
+      });
+    });
+  </script>
+</body>
+</html>
