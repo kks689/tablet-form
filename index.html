@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>平板電腦借用登記</title>
+  <style>
+    :root {
+      --primary: #0071e3;
+      --primary-dark: #005bb5;
+      --bg: #f7f7fa;
+      --card-bg: #fff;
+      --radius: 18px;
+      --shadow: 0 4px 24px #0002;
+      --error: #e00;
+    }
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "蘋方-繁", "PingFang TC", "微軟正黑體", sans-serif;
+      font-size: 16px;
+    }
+    .form-container {
+      background: var(--card-bg);
+      max-width: 430px;
+      margin: 6vh auto;
+      padding: 2.5em 2em 2em 2em;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      box-sizing: border-box;
+    }
+    .form-group { margin-bottom: 1.2em; }
+    label { display: block; margin-bottom: 0.4em; font-weight: 600; font-size: 1em; }
+    input[type="text"], textarea {
+      width: 100%; padding: 0.6em 0.7em; border: 1px solid #d1d1d6; border-radius: 10px; font-size: 1em; background: #fafafd;
+      transition: border 0.2s;
+    }
+    input[type="text"]:focus, textarea:focus { border: 1.5px solid var(--primary); outline: none; }
+    textarea { resize: vertical; min-height: 40px; font-size: 1em; }
+    input[type="radio"] { accent-color: var(--primary); margin-right: 0.4em; }
+    .radio-group label { display: inline-block; margin-right: 1.4em; font-weight: 500; }
+    .hidden { display: none; }
+    .error-tip {
+      color: var(--error);
+      font-size: 0.98em;
+      margin-top: 0.25em;
+      margin-bottom: 0.2em;
+      display: none;
+    }
+    .show { display: block !important; }
+    button {
+      width: 100%; background: var(--primary); color: #fff; border: none; padding: 0.8em 0; border-radius: 12px; font-size: 1.13em; font-weight: 600;
+      letter-spacing: 0.02em; box-shadow: 0 2px 10px #0071e31a; transition: background 0.16s, box-shadow 0.2s;
+      cursor: pointer;
+    }
+    button:hover { background: var(--primary-dark); box-shadow: 0 2px 14px #0071e34a; }
+    h1 {
+      text-align: center; font-size: 1.5em; margin-bottom: 1em; font-weight: 700; letter-spacing: 0.02em; color: #222;
+    }
+    @media (max-width: 600px) {
+      .form-container { max-width: 99vw; margin: 3vw 1vw; padding: 1.6em 0.7em 1.4em 0.7em; }
+      html { font-size: 15px; }
+      button { font-size: 1.04em; }
+    }
+    @media (max-width: 400px) {
+      html { font-size: 14px; }
+      .form-container { padding: 0.9em 0.1em; }
+    }
+  </style>
+</head>
+<body>
+  <div class="form-container">
+    <h1>平板電腦借用登記</h1>
+    <form id="registerForm" autocomplete="off" novalidate>
+      <div class="form-group">
+        <label for="datetime">日期時間</label>
+        <input type="text" id="datetime" name="datetime" readonly>
+      </div>
+      <div class="form-group">
+        <label for="name">姓名</label>
+        <input type="text" id="name" name="name" pattern="^[A-Za-z ]+$" required
+          placeholder="例如 cbs 或 Chan Bak Shun"
+          title="只可輸入英文字母及空格">
+        <span id="nameError" class="error-tip">姓名只可輸入英文字母及空格（例如 cbs 或 Chan Bak Shun）</span>
+      </div>
+      <div class="form-group radio-group">
+        <label>登記類型</label>
+        <label><input type="radio" name="type" value="借用" required> 借用</label>
+        <label><input type="radio" name="type" value="歸還"> 歸還</label>
+        <label><input type="radio" name="type" value="其他"> 其他</label>
+      </div>
+      <div class="form-group hidden" id="otherReasonGroup">
+        <label for="otherReason">其他原因</label>
+        <input type="text" id="otherReason" name="otherReason"
+          placeholder="例如：無電、平板有問題、上不到 wifi，請在此說明">
+      </div>
+      <div class="form-group">
+        <label for="remark">備註</label>
+        <textarea id="remark" name="remark" placeholder="如有損壞或遺失才需填寫"></textarea>
+      </div>
+      <button type="submit">提交</button>
+    </form>
+  </div>
+  <script>
+    // 自動填入當前日期時間
+    function updateDatetime() {
+      const now = new Date();
+      const formatted = now.getFullYear() + '-' +
+        ('0'+(now.getMonth()+1)).slice(-2) + '-' +
+        ('0'+now.getDate()).slice(-2) + ' ' +
+        ('0'+now.getHours()).slice(-2) + ':' +
+        ('0'+now.getMinutes()).slice(-2) + ':' +
+        ('0'+now.getSeconds()).slice(-2);
+      document.getElementById('datetime').value = formatted;
+    }
+    updateDatetime();
+
+    // 姓名只接受英文或空格
+    const nameInput = document.getElementById('name');
+    const nameError = document.getElementById('nameError');
+    nameInput.addEventListener('input', function() {
+      if (this.value && !/^[A-Za-z ]+$/.test(this.value)) {
+        nameError.classList.add('show');
+      } else {
+        nameError.classList.remove('show');
+      }
+    });
+
+    document.getElementById('registerForm').addEventListener('submit', function(e) {
+      const nameValue = nameInput.value.trim();
+      if (!/^[A-Za-z ]+$/.test(nameValue)) {
+        nameError.classList.add('show');
+        nameInput.focus();
+        e.preventDefault();
+        return false;
+      }
+      nameError.classList.remove('show');
+      alert('提交成功！');
+      e.preventDefault(); // Demo 用，實際可移除
+    });
+
+    // 切換「其他原因」欄
+    document.querySelectorAll('input[name="type"]').forEach(radio => {
+      radio.addEventListener('change', function() {
+        document.getElementById('otherReasonGroup').classList.toggle('hidden', this.value !== '其他');
+        if (this.value !== '其他') {
+          document.getElementById('otherReason').value = '';
+        }
+      });
+    });
+  </script>
+</body>
+</html>
