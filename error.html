@@ -3,26 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <title>提交失敗</title>
-  <style>
-    body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; text-align: center; }
-    h1 { color: #D32F2F; }
-    p { font-size: 16px; }
-    #errorMessage { color: #D32F2F; font-weight: bold; }
-    a { display: inline-block; padding: 10px 20px; background: #4CAF50; color: white; text-decoration: none; border-radius: 5px; }
-    a:hover { background: #45a049; }
-  </style>
 </head>
 <body>
-  <h1>提交失敗</h1>
-  <p>很抱歉，您的提交遇到問題，請稍後再試。</p>
-  <p id="errorMessage"></p>
-  <p><a href="index.html">返回表單</a></p>
-
-  <script>
-    // 顯示 URL 中的錯誤訊息
-    const params = new URLSearchParams(window.location.search);
-    const errorMessage = params.get("message") || "未知錯誤";
-    document.getElementById("errorMessage").textContent = "錯誤詳情：" + decodeURIComponent(errorMessage);
-  </script>
+  <h2 style="color:#c00">❌ 提交失敗，請再試一次。</h2>
+  <a href="index.html">返回表單</a>
 </body>
 </html>
