@@ -1,138 +1,81 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>平板電腦登記表</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tablet 登記表</title>
   <style>
-    @import url('https://fonts.googleapis.com/css?family=SF+Pro+Display:400,500,700&display=swap');
-    body {
-      font-family: 'SF Pro Display', 'Segoe UI', 'Arial', '微軟正黑體', sans-serif;
-      background: linear-gradient(120deg, #f0f2f5 0%, #dbeafe 100%);
-      margin: 0;
-      min-height: 100vh;
-    }
-    .container {
-      max-width: 430px;
-      margin: 4em auto;
-      background: #fff;
-      border-radius: 2.2rem;
-      box-shadow: 0 8px 40px #0002, 0 1.5px 4px #0001;
-      padding: 2.4em 2em 2em 2em;
-    }
-    h2 {
-      text-align: center;
-      font-size: 2.1em;
-      font-weight: 700;
-      margin: 0 0 2em 0;
-      letter-spacing: 1px;
-      color: #232323;
-    }
-    label {
-      font-weight: 500;
-      color: #444;
-      margin-bottom: .3em;
-      display: block;
-    }
-    input, select, textarea {
-      width: 100%;
-      padding: 0.92em 1em;
-      border: 1.5px solid #e5e7eb;
-      border-radius: 1.3rem;
-      margin-bottom: 1.5em;
-      font-size: 1.07em;
-      background: #f8fafc;
-      box-sizing: border-box;
-      transition: border 0.2s;
-    }
-    input:focus, select:focus, textarea:focus {
-      border: 1.5px solid #2997ff;
-      outline: none;
-      background: #fff;
-    }
-    button {
-      width: 100%;
-      padding: 1em;
-      border: none;
-      border-radius: 1.6rem;
-      background: linear-gradient(90deg, #2997ff 0%, #007aff 100%);
-      color: #fff;
-      font-size: 1.17em;
-      font-weight: 600;
-      letter-spacing: 1.3px;
-      cursor: pointer;
-      margin-bottom: .6em;
-      box-shadow: 0 2px 6px #2997ff20;
-      transition: background 0.2s;
-    }
-    button:hover {
-      background: linear-gradient(90deg, #007aff 0%, #2997ff 100%);
-    }
-    .desc {
-      text-align: center;
-      color: #7e7e7e;
-      margin-bottom: 2.5em;
-      font-size: 1em;
-    }
-    .small {
-      color: #888; font-size: .97em; margin-bottom: .7em;
-    }
-    @media (max-width:600px){
-      .container{padding:1.1em .5em 1.3em .5em;max-width:98vw;}
-    }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial; background: #f7f7fa; }
+    .form-container { background: #fff; max-width: 400px; margin: 40px auto; padding: 32px; border-radius: 16px; box-shadow: 0 4px 24px #0002; }
+    .form-group { margin-bottom: 18px; }
+    label { display: block; margin-bottom: 7px; font-weight: 600; }
+    input[type="text"], input[type="datetime-local"] { width: 100%; padding: 8px 10px; border: 1px solid #ccc; border-radius: 8px; }
+    .hidden { display: none; }
+    button { background: #0071e3; color: #fff; border: none; padding: 10px 22px; border-radius: 8px; font-size: 1em; cursor: pointer; }
+    button:hover { background: #005bb5; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h2>平板電腦登記表</h2>
-    <div class="desc">請填寫以下資料，如有疑問請聯絡IT部門。</div>
-    <form id="myForm" autocomplete="off">
-      <label for="short-name">姓名縮寫（如：ctm）</label>
-      <input type="text" name="姓名縮寫" id="short-name" required maxlength="20" placeholder="請輸入縮寫，例如：ctm">
-      <label for="class">班級</label>
-      <select name="班級" id="class" required>
-        <option value="">請選擇班級</option>
-        <option>1A</option><option>1B</option><option>1C</option>
-        <option>2A</option><option>2B</option><option>2C</option>
-        <option>3A</option><option>3B</option><option>3C</option>
-        <option>4A</option><option>4B</option><option>4C</option>
-        <option>5A</option><option>5B</option><option>5C</option>
-        <option>6A</option><option>6B</option><option>6C</option>
-      </select>
-      <label>登記類型</label>
-      <select name="登記類型" required>
-        <option value="">請選擇</option>
-        <option>早派</option>
-        <option>晚收</option>
-        <option>其他</option>
-      </select>
-      <label for="other">其他原因（如適用）</label>
-      <input type="text" name="其他原因" id="other" maxlength="30" placeholder="請填異常情況，否則可留空">
-      <label for="num">數量</label>
-      <input type="number" name="數量" id="num" min="1" max="50" required placeholder="請輸入數量">
-      <label for="remark">備註</label>
-      <textarea name="備註" id="remark" rows="2" maxlength="60" placeholder="如遺失、損壞等情況"></textarea>
+  <div class="form-container">
+    <form id="registerForm" autocomplete="off">
+      <div class="form-group">
+        <label for="datetime">日期時間</label>
+        <input type="text" id="datetime" name="datetime" readonly>
+      </div>
+      <div class="form-group">
+        <label for="name">姓名（只接受英文）</label>
+        <input type="text" id="name" name="name" pattern="^[A-Za-z ]+$" required
+          placeholder="Please enter English name only"
+          title="只可輸入英文字母及空格">
+      </div>
+      <div class="form-group">
+        <label>登記類型</label>
+        <label><input type="radio" name="type" value="借用" required> 借用</label>
+        <label><input type="radio" name="type" value="歸還"> 歸還</label>
+        <label><input type="radio" name="type" value="其他"> 其他</label>
+      </div>
+      <div class="form-group hidden" id="otherReasonGroup">
+        <label for="otherReason">其他原因</label>
+        <input type="text" id="otherReason" name="otherReason" placeholder="請輸入其他原因">
+      </div>
       <button type="submit">提交</button>
     </form>
   </div>
   <script>
-    const apiUrl = "https://script.google.com/macros/s/AKfycbywHZZZcQg157f0Q-kHj1l-GrFV8ULJBbNUUDtBWGqdaFuSRIv9-YM63W9yk6Ngknb6/exec"; // 換成你自己部署的 exec API
-    document.getElementById('myForm').onsubmit = function(e){
-      e.preventDefault();
-      const formData = new FormData(this);
-      fetch(apiUrl, {
-        method: 'POST',
-        body: formData
-      }).then(r => r.text()).then(text => {
-        if (text.trim() === "OK") {
-          window.location.href = "success.html";
-        } else {
-          window.location.href = "fail.html";
-        }
-      }).catch(() => {
-        window.location.href = "fail.html";
-      });
+    // 自動填入當前日期時間
+    function updateDatetime() {
+      const now = new Date();
+      // 例如 2025-06-28 21:30:02
+      const formatted = now.getFullYear() + '-' +
+        ('0'+(now.getMonth()+1)).slice(-2) + '-' +
+        ('0'+now.getDate()).slice(-2) + ' ' +
+        ('0'+now.getHours()).slice(-2) + ':' +
+        ('0'+now.getMinutes()).slice(-2) + ':' +
+        ('0'+now.getSeconds()).slice(-2);
+      document.getElementById('datetime').value = formatted;
     }
+    updateDatetime();
+
+    // 姓名只接受英文
+    document.getElementById('name').addEventListener('input', function() {
+      this.value = this.value.replace(/[^A-Za-z ]/g, '');
+    });
+
+    // 切換「其他原因」欄
+    document.querySelectorAll('input[name="type"]').forEach(radio => {
+      radio.addEventListener('change', function() {
+        document.getElementById('otherReasonGroup').classList.toggle('hidden', this.value !== '其他');
+        if (this.value !== '其他') {
+          document.getElementById('otherReason').value = '';
+        }
+      });
+    });
+
+    // 表單送出驗證
+    document.getElementById('registerForm').addEventListener('submit', function(e) {
+      // 可以加其他驗證或送資料
+      alert('提交成功！');
+      e.preventDefault(); // Demo 用，實際可移除
+    });
   </script>
 </body>
 </html>
