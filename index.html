@@ -1,0 +1,449 @@
+<!-- #V22 -->
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>平板借還及問題報告登記表</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=2,user-scalable=yes">
+  <style>
+    html, body {
+      height: 100%;
+      min-height: 100%;
+      margin: 0;
+      padding: 0;
+      background: #eee;
+    }
+    body {
+      font-family: Arial, '微軟正黑體', sans-serif;
+      width: 100vw;
+      min-height: 100vh;
+      min-width: 100vw;
+      box-sizing: border-box;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      overflow-x: hidden;
+    }
+    .card {
+      background: #fff;
+      padding: 2.1em 1.3em 1.6em 1.3em;
+      border-radius: 1em;
+      max-width: 430px;
+      width: 100%;
+      margin: 3vh auto 3vh auto;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+      box-sizing: border-box;
+      min-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+    }
+    h1 {
+      text-align: center;
+      font-size: 1.43em;
+      margin-bottom: 0.19em;
+      letter-spacing: 1.5px;
+      font-weight: 700;
+      line-height: 1.22;
+      word-break: break-all;
+    }
+    .subtitle {
+      text-align: left;
+      color: #444;
+      font-size: 1.07em;
+      letter-spacing: 1px;
+      margin-bottom: 0.45em;
+      margin-left: 0;
+      margin-right: 0;
+      margin-top: 0.5em;
+      line-height: 1.85;
+    }
+    label {
+      display: block;
+      margin: 1.12em 0 0.33em 0;
+      font-weight: 600;
+      font-size: 1.06em;
+    }
+    .label-tip {
+      font-weight: 400;
+      font-size: 0.97em;
+      color: #444;
+      margin-left: 0.7em;
+      margin-bottom: 0.22em;
+      display: inline-block;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 0.7em 0.85em;
+      border-radius: 0.5em;
+      border: 1.7px solid #ccc;
+      box-sizing: border-box;
+      margin-bottom: 1.02em;
+      font-size: 1.06em;
+      outline: none;
+      transition: border 0.18s;
+      background: #fff;
+    }
+    select:invalid {
+      color: #888;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: #007aff;
+    }
+    .radio-group-outer {
+      background: #fafbfc;
+      border: 2.2px solid #ccd3df;
+      border-radius: 1.1em;
+      box-shadow: 0 3px 18px #a3c4e533;
+      padding: 1.05em 0.7em 0.85em 0.7em;
+      margin-bottom: 1.15em;
+      margin-top: 0.82em;
+      display: flex;
+      justify-content: center;
+      align-items: stretch;
+      overflow-x: auto;
+    }
+    .radio-group {
+      display: flex;
+      gap: 2.6em;
+      width: 100%;
+      justify-content: center;
+      align-items: stretch;
+    }
+    .radio-group label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 1.15em;
+      gap: 0.3em;
+      min-width: 70px;
+      cursor: pointer;
+      user-select: none;
+      margin-bottom: 0;
+      color: #222;
+      transition: color 0.2s;
+    }
+    .radio-group input[type="radio"] {
+      margin-bottom: 0.14em;
+      transform: scale(1.21);
+      cursor: pointer;
+      accent-color: #007aff;
+      transition: box-shadow 0.2s;
+    }
+    .radio-group span {
+      margin-top: 0.05em;
+      letter-spacing: 1px;
+      transition: color 0.18s, font-weight 0.18s;
+    }
+    .radio-group input[type="radio"]:checked + span {
+      color: #007aff;
+      font-weight: 800;
+    }
+    .radio-group input[type="radio"]:focus-visible + span {
+      outline: 2px solid #007aff;
+      border-radius: 4px;
+      outline-offset: 2px;
+    }
+    button, .other-confirm-btn {
+      background: #f6f6f6;
+      color: #222;
+      border: 1.5px solid #bbb;
+      border-radius: 0.5em;
+      font-size: 1.15em;
+      cursor: pointer;
+      box-shadow: none;
+      transition: border 0.17s, background 0.16s, color 0.13s;
+      padding: 0.7em 0.5em;
+    }
+    button:hover, button:active,
+    .other-confirm-btn:hover, .other-confirm-btn:active {
+      background: #f0f7ff;
+      border-color: #007aff;
+      color: #007aff;
+    }
+    #datetime {
+      text-align: center;
+      color: #555;
+      margin-bottom: 1.12em;
+      font-size: 1.07em;
+      letter-spacing: 1px;
+    }
+    #msg {
+      margin-top: 1.08em;
+      text-align: center;
+      font-weight: 600;
+      font-size: 0.98em;
+    }
+    #msg.success {
+      color: #007aff;
+    }
+    #msg.fail {
+      color: #ee2222;
+    }
+    #nameHint {
+      color: #e11d48;
+      font-size: 0.98em;
+      margin-bottom: 0.7em;
+      display: none;
+    }
+    .other-row {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.4em;
+      margin-bottom: 1.2em;
+    }
+    .other-row textarea {
+      width: 100%;
+      font-family: inherit;
+      font-size: 1.07em;
+      border-radius: 0.5em;
+      border: 1.5px solid #bbb;
+      min-height: 5em;
+      resize: vertical;
+      margin-bottom: 0;
+      background: #fff;
+      color: #222;
+      box-shadow: none;
+      outline: none;
+      padding: 0.7em 0.9em;
+      transition: border 0.16s;
+      box-sizing: border-box;
+    }
+    .other-row textarea:focus {
+      border-color: #007aff;
+    }
+    .other-row .other-confirm-btn {
+      width: 8em;
+      min-width: 5em;
+      max-width: 13em;
+      height: auto;
+      font-weight: 500;
+      margin: 0;
+      letter-spacing: 1px;
+      border-radius: 0.5em;
+      padding: 0.7em 0.4em;
+      box-sizing: border-box;
+      align-self: flex-start;
+      display: none;
+    }
+    .show-other-confirm .other-confirm-btn {
+      display: block;
+    }
+    @media (max-width: 700px) {
+      .card {
+        max-width: 99vw;
+        width: 99vw;
+        border-radius: 0.7em;
+        padding: 1.15em 0.35em 1.1em 0.35em;
+        min-height: 97vh;
+      }
+      body {
+        padding: 0;
+        min-width: 100vw;
+        min-height: 100vh;
+      }
+      .radio-group-outer { padding: 0.5em 0.2em 0.6em 0.2em; }
+      .radio-group { gap: 1.1em; }
+      .other-row .other-confirm-btn { width: 100%; }
+    }
+    @media (max-width: 430px) {
+      h1 { font-size: 1.04em; }
+      .card { padding: 0.7em 0.09em; }
+      label { font-size: 0.97em; }
+      input, textarea, select { font-size: 0.97em; }
+      .radio-group label { font-size: 0.97em; min-width: 52px;}
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>平板借還及問題報告登記表</h1>
+    <div id="datetime"></div>
+    <form id="regForm" autocomplete="off">
+
+      <!-- 登記類型 -->
+      <label style="margin-bottom:0.8em;">登記類型</label>
+      <div class="subtitle">
+        如選「其他」可提交 <b>iPad</b> 問題，<br>
+        例如：沒電、WiFi 連不到等
+      </div>
+      <div class="radio-group-outer">
+        <div class="radio-group" id="typeRadioGroup">
+          <label>
+            <input type="radio" name="type" value="借用" required>
+            <span>借用</span>
+          </label>
+          <label>
+            <input type="radio" name="type" value="歸還">
+            <span>歸還</span>
+          </label>
+          <label>
+            <input type="radio" name="type" value="其他">
+            <span>其他</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- 其他原因（用JS動態插入） -->
+      <div id="otherWrap" style="display:none;">
+        <label>其他原因</label>
+        <div class="other-row">
+          <textarea name="other" placeholder="請填寫 iPad 遇到的問題，例如：沒電、WiFi 連不到、程式打不開等"></textarea>
+          <button type="button" class="other-confirm-btn" id="otherConfirmBtn">確定</button>
+        </div>
+      </div>
+
+      <!-- 姓名縮寫 -->
+      <label for="name">
+        姓名縮寫
+        <span class="label-tip">
+          例如：<b>cbs</b>（只限2個或以上英文字母）
+        </span>
+      </label>
+      <input name="name" id="name" required 
+        placeholder="請輸入全英文字母縮寫，例如：cbs">
+      <div id="nameHint"></div>
+
+      <label for="grade">班級</label>
+      <select name="grade" id="grade" required>
+        <option value="" disabled selected>請選擇班級</option>
+        <option value="1A">1A</option>
+        <option value="1B">1B</option>
+        <option value="1C">1C</option>
+        <option value="2A">2A</option>
+        <option value="2B">2B</option>
+        <option value="2C">2C</option>
+        <option value="3A">3A</option>
+        <option value="3B">3B</option>
+        <option value="3C">3C</option>
+        <option value="4A">4A</option>
+        <option value="4B">4B</option>
+        <option value="4C">4C</option>
+        <option value="5A">5A</option>
+        <option value="5B">5B</option>
+        <option value="5C">5C</option>
+        <option value="6A">6A</option>
+        <option value="6B">6B</option>
+        <option value="6C">6C</option>
+      </select>
+
+      <label for="qty">數量</label>
+      <input name="qty" id="qty" type="number" min="1" required>
+      <label for="remark">備註</label>
+      <textarea name="remark" id="remark" placeholder="如有平板遺失、損壞等問題，請在此說明"></textarea>
+      <button type="submit">提交</button>
+      <div id="msg"></div>
+    </form>
+  </div>
+  <script>
+    const apiUrl = "https://script.google.com/macros/s/AKfycbz4n9zP3hjjoRVmFjfR5CHP__mtwm_t-3qgTMEthENXDEbnWMzf4wws0syIdilnEtb1/exec";
+
+    // 時間顯示
+    function updateTime() {
+      const n = new Date();
+      const fmt = x => String(x).padStart(2, '0');
+      document.getElementById("datetime").textContent =
+        `${n.getFullYear()}/${fmt(n.getMonth() + 1)}/${fmt(n.getDate())} ${fmt(n.getHours())}:${fmt(n.getMinutes())}:${fmt(n.getSeconds())}`;
+    }
+    setInterval(updateTime, 1000);
+    updateTime();
+
+    // 其他原因移到姓名縮寫前
+    function toggleOther() {
+      const otherWrap = document.getElementById('otherWrap');
+      const nameLabel = document.querySelector('label[for="name"]');
+      const radioOther = document.querySelector('[name="type"]:checked')?.value === '其他';
+
+      if(radioOther){
+        // show and move above name
+        otherWrap.style.display = 'block';
+        if (otherWrap.previousElementSibling !== nameLabel) {
+          nameLabel.parentNode.insertBefore(otherWrap, nameLabel);
+        }
+        document.body.classList.add('show-other-confirm');
+      } else {
+        // hide and move back to radio group下
+        otherWrap.style.display = 'none';
+        const radioGroupOuter = document.querySelector('.radio-group-outer');
+        if (radioGroupOuter.nextElementSibling !== otherWrap) {
+          radioGroupOuter.parentNode.insertBefore(otherWrap, radioGroupOuter.nextElementSibling);
+        }
+        document.body.classList.remove('show-other-confirm');
+      }
+    }
+    document.querySelectorAll('[name="type"]').forEach(r => {
+      r.addEventListener('change', toggleOther);
+    });
+    window.addEventListener('DOMContentLoaded', toggleOther);
+
+    // 姓名縮寫驗證：2個或以上英文字母
+    document.getElementById('name').addEventListener('input', function(){
+      const val = this.value;
+      const hint = document.getElementById('nameHint');
+      if(val && (!/^[A-Za-z]+$/.test(val) || val.length < 2)){
+        this.setCustomValidity("請輸入2個或以上英文字母，例如：cbs");
+        hint.style.display = 'block';
+        hint.textContent = '⚠️ 只可輸入2個或以上英文字母（A-Z，a-z），不能有數字或符號';
+      } else {
+        this.setCustomValidity("");
+        hint.style.display = 'none';
+        hint.textContent = '';
+      }
+    });
+
+    // 提交「其他原因」
+    document.getElementById('otherConfirmBtn').addEventListener('click', function() {
+      const form = document.getElementById('regForm');
+      // 驗證必填
+      const otherText = form.other.value.trim();
+      if(!otherText) {
+        form.other.focus();
+        return;
+      }
+      // 送出
+      const fd = new FormData(form);
+      fetch(apiUrl, { method: 'POST', body: fd })
+        .then(r => r.text())
+        .then(t => {
+          if (t.trim() === "OK") {
+            window.location.href = "success.html";
+          } else {
+            window.location.href = "error.html";
+          }
+        })
+        .catch(() => {
+          window.location.href = "error.html";
+        });
+    });
+
+    // 一般提交（除非選其他）
+    document.getElementById('regForm').onsubmit = function (e) {
+      const type = document.querySelector('[name="type"]:checked')?.value;
+      if(type === "其他") {
+        e.preventDefault(); // 用「確定」掣提交
+        document.getElementById('otherConfirmBtn').focus();
+        return false;
+      }
+      e.preventDefault();
+      const fd = new FormData(this);
+      fetch(apiUrl, { method: 'POST', body: fd })
+        .then(r => r.text())
+        .then(t => {
+          if (t.trim() === "OK") {
+            window.location.href = "success.html";
+          } else {
+            window.location.href = "error.html";
+          }
+        })
+        .catch(() => {
+          window.location.href = "error.html";
+        });
+    };
+  </script>
+</body>
+</html>
