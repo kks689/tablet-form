@@ -1,4 +1,4 @@
-<!-- #V22 -->
+<!-- #V26 -->
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
@@ -149,21 +149,25 @@
       outline-offset: 2px;
     }
     button, .other-confirm-btn {
-      background: #f6f6f6;
-      color: #222;
-      border: 1.5px solid #bbb;
-      border-radius: 0.5em;
-      font-size: 1.15em;
+      background: #007aff;
+      color: #fff;
+      border: none;
+      border-radius: 0.6em;
+      font-size: 1.19em;
       cursor: pointer;
-      box-shadow: none;
-      transition: border 0.17s, background 0.16s, color 0.13s;
-      padding: 0.7em 0.5em;
+      box-shadow: 0 2px 8px #007aff22;
+      transition: border 0.17s, background 0.16s, color 0.13s, box-shadow 0.14s;
+      padding: 0.8em 0.5em;
+      font-weight: 700;
+      margin-top: 0.6em;
+      margin-bottom: 0.3em;
+      letter-spacing: 2px;
     }
     button:hover, button:active,
     .other-confirm-btn:hover, .other-confirm-btn:active {
-      background: #f0f7ff;
-      border-color: #007aff;
-      color: #007aff;
+      background: #025ee2;
+      color: #fff;
+      box-shadow: 0 2px 18px #007aff44;
     }
     #datetime {
       text-align: center;
@@ -230,6 +234,9 @@
       box-sizing: border-box;
       align-self: flex-start;
       display: none;
+      background: #007aff;
+      color: #fff;
+      border: none;
     }
     .show-other-confirm .other-confirm-btn {
       display: block;
