@@ -1,4 +1,4 @@
-<!-- #V26 -->
+<!-- #V27 -->
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
@@ -148,7 +148,7 @@
       border-radius: 4px;
       outline-offset: 2px;
     }
-    button, .other-confirm-btn {
+    button {
       background: #007aff;
       color: #fff;
       border: none;
@@ -163,8 +163,7 @@
       margin-bottom: 0.3em;
       letter-spacing: 2px;
     }
-    button:hover, button:active,
-    .other-confirm-btn:hover, .other-confirm-btn:active {
+    button:hover, button:active {
       background: #025ee2;
       color: #fff;
       box-shadow: 0 2px 18px #007aff44;
@@ -221,26 +220,6 @@
     .other-row textarea:focus {
       border-color: #007aff;
     }
-    .other-row .other-confirm-btn {
-      width: 8em;
-      min-width: 5em;
-      max-width: 13em;
-      height: auto;
-      font-weight: 500;
-      margin: 0;
-      letter-spacing: 1px;
-      border-radius: 0.5em;
-      padding: 0.7em 0.4em;
-      box-sizing: border-box;
-      align-self: flex-start;
-      display: none;
-      background: #007aff;
-      color: #fff;
-      border: none;
-    }
-    .show-other-confirm .other-confirm-btn {
-      display: block;
-    }
     @media (max-width: 700px) {
       .card {
         max-width: 99vw;
@@ -256,7 +235,6 @@
       }
       .radio-group-outer { padding: 0.5em 0.2em 0.6em 0.2em; }
       .radio-group { gap: 1.1em; }
-      .other-row .other-confirm-btn { width: 100%; }
     }
     @media (max-width: 430px) {
       h1 { font-size: 1.04em; }
@@ -296,12 +274,11 @@
         </div>
       </div>
 
-      <!-- 其他原因（用JS動態插入） -->
+      <!-- 其他原因（無確定掣，只有textarea） -->
       <div id="otherWrap" style="display:none;">
         <label>其他原因</label>
         <div class="other-row">
           <textarea name="other" placeholder="請填寫 iPad 遇到的問題，例如：沒電、WiFi 連不到、程式打不開等"></textarea>
-          <button type="button" class="other-confirm-btn" id="otherConfirmBtn">確定</button>
         </div>
       </div>
 
@@ -372,7 +349,6 @@
         if (otherWrap.previousElementSibling !== nameLabel) {
           nameLabel.parentNode.insertBefore(otherWrap, nameLabel);
         }
-        document.body.classList.add('show-other-confirm');
       } else {
         // hide and move back to radio group下
         otherWrap.style.display = 'none';
@@ -380,7 +356,6 @@
         if (radioGroupOuter.nextElementSibling !== otherWrap) {
           radioGroupOuter.parentNode.insertBefore(otherWrap, radioGroupOuter.nextElementSibling);
         }
-        document.body.classList.remove('show-other-confirm');
       }
     }
     document.querySelectorAll('[name="type"]').forEach(r => {
@@ -403,39 +378,8 @@
       }
     });
 
-    // 提交「其他原因」
-    document.getElementById('otherConfirmBtn').addEventListener('click', function() {
-      const form = document.getElementById('regForm');
-      // 驗證必填
-      const otherText = form.other.value.trim();
-      if(!otherText) {
-        form.other.focus();
-        return;
-      }
-      // 送出
-      const fd = new FormData(form);
-      fetch(apiUrl, { method: 'POST', body: fd })
-        .then(r => r.text())
-        .then(t => {
-          if (t.trim() === "OK") {
-            window.location.href = "success.html";
-          } else {
-            window.location.href = "error.html";
-          }
-        })
-        .catch(() => {
-          window.location.href = "error.html";
-        });
-    });
-
-    // 一般提交（除非選其他）
+    // 一般提交
     document.getElementById('regForm').onsubmit = function (e) {
-      const type = document.querySelector('[name="type"]:checked')?.value;
-      if(type === "其他") {
-        e.preventDefault(); // 用「確定」掣提交
-        document.getElementById('otherConfirmBtn').focus();
-        return false;
-      }
       e.preventDefault();
       const fd = new FormData(this);
       fetch(apiUrl, { method: 'POST', body: fd })
