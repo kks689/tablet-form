@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>平板派發與回收登記表</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <style>
+    body { background:#f0f0f0; font-family:'SF Pro','微軟正黑體',sans-serif; margin:0; }
+    .card { background:#fff; max-width:400px; margin:4em auto; padding:2em; border-radius:24px; box-shadow:0 4px 20px rgba(0,0,0,0.1);}
+    h1 { font-size:1.4em; font-weight:600; text-align:center; margin-bottom:1em; }
+    .datetime { text-align:center; font-size:1em; margin-bottom:1.2em; color:#555; }
+    label { display:block; margin:0.8em 0 0.3em; font-weight:500; }
+    input, select, textarea { width:100%; padding:0.7em; border-radius:12px; border:1px solid #ccc; font-size:1em; box-shadow:inset 2px 2px 5px rgba(0,0,0,0.05); }
+    .radio-group { display:flex; gap:1em; margin-top:0.5em; }
+    .radio-group label { display:flex; align-items:center; gap:0.3em; font-weight:400; }
+    button { width:100%; padding:0.9em; background:#007AFF; color:#fff; border:none; border-radius:16px; font-size:1.1em; margin-top:1.2em; cursor:pointer; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>平板派發與回收登記表</h1>
+    <div class="datetime" id="datetime"></div>
+
+    <form id="regForm">
+      <label>姓名縮寫：<input name="姓名縮寫" pattern="[A-Za-z]{2,}" title="請輸入英文縮寫，至少 2 個字母" required placeholder="例如：cbs"></label>
+      <label>班級：
+        <select name="班級" required>
+          <option value="">請選擇</option>
+          <option>1A</option><option>1B</option><option>1C</option>
+          <option>2A</option><option>2B</option><option>2C</option>
+          <option>3A</option><option>3B</option><option>3C</option>
+          <option>4A</option><option>4B</option><option>4C</option>
+          <option>5A</option><option>5B</option><option>5C</option>
+          <option>6A</option><option>6B</option><option>6C</option>
+        </select>
+      </label>
+      <label>登記類型：</label>
+      <div class="radio-group">
+        <label><input type="radio" name="登記類型" value="借用" required> 借用</label>
+        <label><input type="radio" name="登記類型" value="歸還"> 歸還</label>
+        <label><input type="radio" name="登記類型" value="其他"> 其他</label>
+      </div>
+      <div id="otherWrap" style="display:none;">
+        <label>其他原因：<input name="其他原因" maxlength="50" placeholder="請填寫原因"></label>
+      </div>
+      <label>數量：<input name="數量" type="number" min="1" max="50" required></label>
+      <label>備註：<textarea name="備註" rows="2"></textarea></label>
+      <button type="submit">提交</button>
+    </form>
+
+    <div id="msg" style="text-align:center; margin-top:1em; font-weight:600;"></div>
+  </div>
+
+  <script>
+    const execUrl = "https://script.google.com/macros/s/AKfycbz4n9zP3hjjoRVmFjfR5CHP__mtwm_t-3qgTMEthENXDEbnWMzf4wws0syIdilnEtb1/exec";
+
+    // 顯示實時日期時間
+    const dt = document.getElementById('datetime');
+    function updateDT() {
+      const n = new Date();
+      dt.textContent = `${n.getFullYear()}/${String(n.getMonth()+1).padStart(2,0)}/${String(n.getDate()).padStart(2,0)}  `
+        + `${String(n.getHours()).padStart(2,0)}:${String(n.getMinutes()).padStart(2,0)}:${String(n.getSeconds()).padStart(2,0)}`;
+    }
+    setInterval(updateDT,1000); updateDT();
+
+    // 顯示/隱藏其他原因欄位
+    document.querySelectorAll('input[name="登記類型"]').forEach(radio => {
+      radio.addEventListener('change', () => {
+        document.getElementById('otherWrap').style.display =
+          radio.value === '其他' ? 'block' : 'none';
+      });
+    });
+
+    // 表單 submit
+    document.getElementById('regForm').addEventListener('submit', e => {
+      e.preventDefault();
+      const form = e.target;
+      const msg = document.getElementById('msg');
+      msg.textContent = ''; msg.style.color = '';
+
+      fetch(execUrl, { method: 'POST', body: new FormData(form) })
+        .then(resp => resp.text())
+        .then(text => {
+          if (text.trim() === 'OK' || text.includes('success')) {
+            msg.textContent = '✅ 已成功提交，5 秒後返回。';
+            msg.style.color = '#007AFF';
+            setTimeout(() => location.reload(), 5000);
+          } else {
+            msg.textContent = '❌ 提交失敗！';
+            msg.style.color = '#EE2222';
+          }
+        }).catch(() => {
+          msg.textContent = '❌ 無法連接，請稍候再試';
+          msg.style.color = '#EE2222';
+        });
+    });
+  </script>
+</body>
+</html>
