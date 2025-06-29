@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>平板派發與回收登記表</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    body{background:#eee;font-family:Arial,sans-serif;margin:0;padding:2em;}
+    .card{background:#fff;padding:1.5em;border-radius:1em;max-width:400px;margin:auto;
+      box-shadow:0 4px 20px rgba(0,0,0,0.1);}
+    h1{text-align:center;font-size:1.4em;margin-bottom:0.5em;}
+    #datetime{text-align:center;color:#555;margin-bottom:1em;}
+    label{display:block;margin:1em 0 0.3em;font-weight:600;}
+    input,select,textarea{width:100%;padding:0.6em;border-radius:0.5em;border:1px solid #ccc;
+      box-sizing:border-box;margin-bottom:0.7em;font-size:1em;}
+    .radio-group{display:flex;justify-content:space-around;margin-bottom:0.5em;}
+    .radio-group label{font-weight:normal;}
+    button{width:100%;background:#007aff;color:#fff;border:none;border-radius:0.7em;
+      padding:0.8em;font-size:1.1em;cursor:pointer;box-shadow:0 2px 10px rgba(0,122,255,0.4);}
+    #msg{margin-top:1em;text-align:center;font-weight:600;font-size:0.95em;}
+    #msg.success{color:#007aff;}
+    #msg.fail{color:#ee2222;}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>平板派發與回收登記表</h1>
+    <div id="datetime"></div>
+    <form id="regForm">
+      <label>姓名縮寫</label>
+      <input name="name" id="name" required placeholder="例如：cbs (英文字母)">
+      <label>班級</label>
+      <input name="grade" id="grade" required placeholder="例如：1A">
+      <label>登記類型</label>
+      <div class="radio-group">
+        <label><input type="radio" name="type" value="借用" required>借用</label>
+        <label><input type="radio" name="type" value="歸還">歸還</label>
+        <label><input type="radio" name="type" value="其他">其他</label>
+      </div>
+      <div id="otherWrap" style="display:none;">
+        <label>其他原因</label>
+        <input name="other" placeholder="請填寫其他原因">
+      </div>
+      <label>數量</label>
+      <input name="qty" type="number" min="1" required>
+      <label>備註</label>
+      <textarea name="remark"></textarea>
+      <button type="submit">提交</button>
+      <div id="msg"></div>
+    </form>
+  </div>
+  <script>
+    const apiUrl = "https://script.google.com/macros/s/AKfycbz4n9zP3hjjoRVmFjfR5CHP__mtwm_t-3qgTMEthENXDEbnWMzf4wws0syIdilnEtb1/exec";
+
+    // 時間顯示
+    function updateTime(){
+      const n=new Date();
+      const fmt=x=>String(x).padStart(2,'0');
+      document.getElementById("datetime").textContent =
+        `${n.getFullYear()}/${fmt(n.getMonth()+1)}/${fmt(n.getDate())} ${fmt(n.getHours())}:${fmt(n.getMinutes())}:${fmt(n.getSeconds())}`;
+    }
+    setInterval(updateTime,1000);
+    updateTime();
+
+    // 顯示其他原因
+    document.querySelectorAll('[name="type"]').forEach(r=>{
+      r.addEventListener('change',()=>{
+        document.getElementById('otherWrap').style.display =
+          document.querySelector('[name="type"]:checked').value === '其他' ? 'block':'none';
+      });
+    });
+
+    // 驗證姓名輸入英文字母
+    document.getElementById('name').addEventListener('input', function(){
+      const val=this.value;
+      if(val && !/^[A-Za-z]+$/.test(val)){
+        this.setCustomValidity("請只輸入英文字母縮寫");
+      } else this.setCustomValidity("");
+    });
+
+    // 提交
+    document.getElementById('regForm').onsubmit = function(e){
+      e.preventDefault();
+      const msgEl = document.getElementById('msg');
+      msgEl.textContent="";
+      const fd = new FormData(this);
+      fetch(apiUrl, {method:'POST',body:fd})
+        .then(r=>r.text())
+        .then(t=>{
+          if(t.trim()==="OK"){
+            msgEl.textContent="✅ 已成功提交，5 秒後清除表單。";
+            msgEl.className="success"; this.reset();
+            setTimeout(()=>{msgEl.textContent="";},5000);
+          } else {
+            msgEl.textContent="❌ 提交失敗，請重試。";
+            msgEl.className="fail";
+          }
+        })
+        .catch(()=>{
+          msgEl.textContent="❌ 無法連接，請稍後再試。";
+          msgEl.className="fail";
+        });
+    };
+  </script>
+</body>
+</html>
