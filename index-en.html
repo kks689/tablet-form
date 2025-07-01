@@ -4,12 +4,17 @@
   <meta charset="UTF-8">
   <title>Tablet Borrowing and Issue Report Form</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
-    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    /* Reset and Base Styles */
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Arial, 'microsft jhenghei', sans-serif;
-      background: rgba(135, 206, 235, 0.3);
+      background: rgba(135, 206, 235, 0.3); /* Transparent sky blue, 30% opacity */
       min-height: 100vh;
       display: flex;
       justify-content: center;
@@ -17,50 +22,224 @@
       padding: 2rem;
       color: #1d1d1f;
     }
-    .card { background: #fff; border-radius: 20px; padding: 2.5rem 2rem; max-width: 500px; width: 100%; margin: 2.5rem auto; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); display: flex; flex-direction: column; gap: 2rem; position: relative; display:none; }
-    .lang-en { position: absolute; top: 1rem; right: 1rem; font-size: 0.875rem; color: #0071e3; font-weight: 600; cursor: pointer;}
-    h1 { font-size: 2rem; font-weight: 600; text-align: center; letter-spacing: -0.02em; color: #1d1d1f; }
-    #datetime { text-align: center; font-size: 1rem; color: #6e6e73; margin-bottom: 1.5rem; }
-    .subtitle { font-size: 1rem; color: #6e6e73; line-height: 1.5; margin-bottom: 1.5rem; text-align: left; }
-    label { font-size: 1rem; font-weight: 600; color: #1d1d1f; margin-bottom: 0.75rem; display: block; }
-    .label-tip { font-size: 0.875rem; color: #6e6e73; margin-left: 0.75rem; font-weight: 400; }
-    input, select, textarea { width: 100%; padding: 1rem; border: 1px solid #d2d2d7; border-radius: 12px; font-size: 1.125rem; background: #fff; transition: border-color 0.2s, box-shadow 0.2s; }
-    input:focus, select:focus, textarea:focus { outline: none; border-color: #0071e3; box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1); }
-    select:invalid { color: #86868b; }
-    textarea { min-height: 120px; resize: vertical; }
-    .radio-group-outer { background: #f5f5f7; border-radius: 14px; padding: 1.2rem; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; width: 100%; }
-    .radio-group { display: flex; gap: 0; width: 100%; justify-content: space-between; }
-    .radio-group label { display: flex; flex-direction: column; align-items: center; font-size: 1rem; font-weight: 600; color: #1d1d1f; cursor: pointer; transition: color 0.2s; flex: 1; text-align: center; }
-    .radio-group input[type="radio"] { width: 1.5rem; height: 1.5rem; margin-bottom: 0.3rem; accent-color: #0071e3; cursor: pointer; }
-    .radio-group input[type="radio"]:checked + span { color: #0071e3; font-weight: 700; }
-    button { background: #0071e3; color: #fff; border: none; border-radius: 12px; padding: 1rem; font-size: 1.125rem; font-weight: 600; cursor: pointer; transition: background-color 0.2s, transform 0.1s; margin-top: 1.5rem; }
-    button:hover { background: #005bb5; }
-    button:active { transform: scale(0.98); }
-    #msg { text-align: center; font-size: 1rem; font-weight: 600; color: #0071e3; min-height: 1.75rem; }
-    #msg.fail { color: #d70015; }
-    #nameHint { color: #d70015; font-size: 0.875rem; margin-top: 0.25rem; margin-bottom: 0.75rem; display: none; }
-    @media (max-width: 768px) { .card { padding: 2rem 1.5rem; margin: 1.5rem; } h1 { font-size: 1.75rem; } .radio-group { flex-direction: row; justify-content: space-around; } }
-    @media (max-width: 480px) { h1 { font-size: 1.5rem; } label, input, select, textarea, .radio-group label { font-size: 1rem; } .card { padding: 1.5rem 1rem; } .radio-group { flex-direction: column; align-items: center; gap: 1.5rem; } .radio-group label { flex: none; } }
-    #signin-block {display:flex;justify-content:center;align-items:center;height:100vh;}
+
+    .card {
+      background: #fff;
+      border-radius: 20px;
+      padding: 2.5rem 2rem;
+      max-width: 500px;
+      width: 100%;
+      margin: 2.5rem auto;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      position: relative; /* For EN marker */
+    }
+
+    .lang-en {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      font-size: 0.875rem;
+      color: #0071e3;
+      font-weight: 600;
+      cursor: pointer; /* Indicates clickable */
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 600;
+      text-align: center;
+      letter-spacing: -0.02em;
+      color: #1d1d1f;
+    }
+
+    #datetime {
+      text-align: center;
+      font-size: 1rem;
+      color: #6e6e73;
+      margin-bottom: 1.5rem;
+    }
+
+    .subtitle {
+      font-size: 1rem;
+      color: #6e6e73;
+      line-height: 1.5;
+      margin-bottom: 1.5rem;
+      text-align: left; /* Left-aligned as requested */
+    }
+
+    label {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #1d1d1f;
+      margin-bottom: 0.75rem;
+      display: block;
+    }
+
+    .label-tip {
+      font-size: 0.875rem;
+      color: #6e6e73;
+      margin-left: 0.75rem;
+      font-weight: 400;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 1rem;
+      border: 1px solid #d2d2d7;
+      border-radius: 12px;
+      font-size: 1.125rem;
+      background: #fff;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: #0071e3;
+      box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1);
+    }
+
+    select:invalid {
+      color: #86868b;
+    }
+
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    .radio-group-outer {
+      background: #f5f5f7;
+      border-radius: 14px;
+      padding: 1.2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      width: 100%;
+    }
+
+    .radio-group {
+      display: flex;
+      gap: 0;
+      width: 100%;
+      justify-content: space-between;
+    }
+
+    .radio-group label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #1d1d1f;
+      cursor: pointer;
+      transition: color 0.2s;
+      flex: 1;
+      text-align: center;
+    }
+
+    .radio-group input[type="radio"] {
+      width: 1.5rem;
+      height: 1.5rem;
+      margin-bottom: 0.3rem;
+      accent-color: #0071e3;
+      cursor: pointer;
+    }
+
+    .radio-group input[type="radio"]:checked + span {
+      color: #0071e3;
+      font-weight: 700;
+    }
+
+    button {
+      background: #0071e3;
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 1rem;
+      font-size: 1.125rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s, transform 0.1s;
+      margin-top: 1.5rem;
+    }
+
+    button:hover {
+      background: #005bb5;
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    #msg {
+      text-align: center;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #0071e3;
+      min-height: 1.75rem;
+    }
+
+    #msg.fail {
+      color: #d70015;
+    }
+
+    #nameHint {
+      color: #d70015;
+      font-size: 0.875rem;
+      margin-top: 0.25rem;
+      margin-bottom: 0.75rem;
+      display: none;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .card {
+        padding: 2rem 1.5rem;
+        margin: 1.5rem;
+      }
+
+      h1 {
+        font-size: 1.75rem;
+      }
+
+      .radio-group {
+        flex-direction: row;
+        justify-content: space-around;
+      }
+    }
+
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 1.5rem;
+      }
+
+      label, input, select, textarea, .radio-group label {
+        font-size: 1rem;
+      }
+
+      .card {
+        padding: 1.5rem 1rem;
+      }
+
+      .radio-group {
+        flex-direction: column;
+        align-items: center;
+        gap: 1.5rem;
+      }
+
+      .radio-group label {
+        flex: none;
+      }
+    }
   </style>
 </head>
 <body>
-  <!-- Google 登入（彈窗/按鈕區） -->
-  <div id="signin-block">
-    <div id="g_id_onload"
-         data-client_id="726302531311-b93ihdsqd3m46tk7r2okmsirsd6u8i8j.apps.googleusercontent.com"
-         data-callback="onSignIn"
-         data-auto_prompt="true"></div>
-    <div class="g_id_signin"
-         data-type="standard"
-         data-size="large"
-         data-theme="outline"
-         data-text="sign_in_with"
-         data-shape="rectangular"
-         data-logo_alignment="left"></div>
-  </div>
-  <div class="card" id="mainCard">
-    <div class="lang-en" onclick="switchLanguage()">ZH</div>
+  <div class="card">
+    <div class="lang-en" onclick="switchLanguage()">ZH</div> <!-- Ensure ZH is present -->
     <h1>Tablet Borrowing and Issue Report Form</h1>
     <div id="datetime"></div>
     <form id="regForm" autocomplete="off">
@@ -85,16 +264,22 @@
           </label>
         </div>
       </div>
+
+      <!-- Other Reason -->
       <div id="otherWrap" style="display:none;">
         <label>Other Reason</label>
         <textarea name="other" placeholder="Please describe the iPad issue, e.g., no power, WiFi not connecting, app not opening, etc."></textarea>
       </div>
+
+      <!-- Name Abbreviation -->
       <label for="name">
         Name Abbreviation
         <span class="label-tip">e.g., <b>cbs</b> (must be 2 or more English letters)</span>
       </label>
       <input name="name" id="name" required placeholder="Enter English letter abbreviation, e.g., cbs">
       <div id="nameHint"></div>
+
+      <!-- Class -->
       <label for="grade">Class</label>
       <select name="grade" id="grade" required>
         <option value="" disabled selected>Please select a class</option>
@@ -117,26 +302,23 @@
         <option value="6B">6B</option>
         <option value="6C">6C</option>
       </select>
+
+      <!-- Quantity -->
       <label for="qty">Quantity</label>
       <input name="qty" id="qty" type="number" min="1" required>
+
+      <!-- Remarks -->
       <label for="remark">Remarks</label>
       <textarea name="remark" id="remark" placeholder="Please note any issues like lost or damaged tablets here"></textarea>
+
+      <!-- Submit Button -->
       <button type="submit">Submit</button>
       <div id="msg"></div>
     </form>
   </div>
-  <script>
-    // 更新為你新 API 連結
-    const apiUrl = "https://script.google.com/macros/s/AKfycbwHUIjW6KwoPgle7q225KLyqoq7eN7WwpYeuBX9V1snZcH15qmXyXRmLcewR0pItjLz/exec";
-    let idToken = "";
 
-    // Google 登入 callback
-    function onSignIn(response) {
-      idToken = response.credential;
-      document.getElementById('signin-block').style.display = 'none';
-      document.getElementById('mainCard').style.display = '';
-      document.querySelector('.g_id_signin').style.display = 'none';
-    }
+  <script>
+    const apiUrl = "https://script.google.com/macros/s/AKfycbxa3dhSk3D5O_3AZ3hwvNP3N91Zl5jG0s7Tr9T5zju6KK3XxaIoP23EhaEpj4zNPlnQ/exec";
 
     // Real-time clock
     function updateTime() {
@@ -167,6 +349,7 @@
         }
       }
     }
+
     document.querySelectorAll('[name="type"]').forEach(r => {
       r.addEventListener('change', toggleOther);
     });
@@ -187,29 +370,23 @@
       }
     });
 
-    // Form submission (POST JSON + idToken)
+    // Form submission
     document.getElementById('regForm').onsubmit = async function(e) {
       e.preventDefault();
       const fd = new FormData(this);
       const msg = document.getElementById('msg');
       let isTimeout = false;
+
       msg.textContent = 'Please wait... Submitting';
+
       const timeoutId = setTimeout(() => {
         isTimeout = true;
         msg.textContent = 'Server busy, please try again later';
         msg.classList.add('fail');
       }, 10000);
 
-      const data = {};
-      fd.forEach((v, k) => data[k] = v);
-      data.idToken = idToken;
-
       try {
-        const response = await fetch(apiUrl, {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify(data)
-        });
+        const response = await fetch(apiUrl, { method: 'POST', body: fd });
         const text = await response.text();
         if (isTimeout) return;
         clearTimeout(timeoutId);
