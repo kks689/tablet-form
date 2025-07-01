@@ -6,18 +6,53 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
-    /* ...你原本全部CSS照舊... */
-    /* 請用你原有CSS，這裡略去重複 */
+    /* 你的原有 CSS 全部保留 ... */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Arial, '微軟正黑體', sans-serif;
+      background: rgba(135, 206, 235, 0.3);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 2rem;
+      color: #1d1d1f;
+    }
+    .card { background: #fff; border-radius: 20px; padding: 2.5rem 2rem; max-width: 500px; width: 100%; margin: 2.5rem auto; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); display: flex; flex-direction: column; gap: 2rem; position: relative; display:none; }
+    .lang-en { position: absolute; top: 1rem; right: 1rem; font-size: 0.875rem; color: #0071e3; font-weight: 600; cursor: pointer; }
+    h1 { font-size: 2rem; font-weight: 600; text-align: center; letter-spacing: -0.02em; color: #1d1d1f; }
+    #datetime { text-align: center; font-size: 1rem; color: #6e6e73; margin-bottom: 1.5rem; }
+    .subtitle { font-size: 1rem; color: #6e6e73; line-height: 1.5; margin-bottom: 1.5rem; text-align: left; }
+    label { font-size: 1rem; font-weight: 600; color: #1d1d1f; margin-bottom: 0.75rem; display: block; }
+    .label-tip { font-size: 0.875rem; color: #6e6e73; margin-left: 0.75rem; font-weight: 400; }
+    input, select, textarea { width: 100%; padding: 1rem; border: 1px solid #d2d2d7; border-radius: 12px; font-size: 1.125rem; background: #fff; transition: border-color 0.2s, box-shadow 0.2s; }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: #0071e3; box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1); }
+    select:invalid { color: #86868b; }
+    textarea { min-height: 120px; resize: vertical; }
+    .radio-group-outer { background: #f5f5f7; border-radius: 14px; padding: 1.2rem; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; width: 100%; }
+    .radio-group { display: flex; gap: 0; width: 100%; justify-content: space-between; }
+    .radio-group label { display: flex; flex-direction: column; align-items: center; font-size: 1rem; font-weight: 600; color: #1d1d1f; cursor: pointer; transition: color 0.2s; flex: 1; text-align: center; }
+    .radio-group input[type="radio"] { width: 1.5rem; height: 1.5rem; margin-bottom: 0.3rem; accent-color: #0071e3; cursor: pointer; }
+    .radio-group input[type="radio"]:checked + span { color: #0071e3; font-weight: 700; }
+    button { background: #0071e3; color: #fff; border: none; border-radius: 12px; padding: 1rem; font-size: 1.125rem; font-weight: 600; cursor: pointer; transition: background-color 0.2s, transform 0.1s; margin-top: 1.5rem; }
+    button:hover { background: #005bb5; }
+    button:active { transform: scale(0.98); }
+    #msg { text-align: center; font-size: 1rem; font-weight: 600; color: #0071e3; min-height: 1.75rem; }
+    #msg.fail { color: #d70015; }
+    #nameHint { color: #d70015; font-size: 0.875rem; margin-top: 0.25rem; margin-bottom: 0.75rem; display: none; }
+    @media (max-width: 768px) { .card { padding: 2rem 1.5rem; margin: 1.5rem; } h1 { font-size: 1.75rem; } .radio-group { flex-direction: row; justify-content: space-around; } }
+    @media (max-width: 480px) { h1 { font-size: 1.5rem; } label, input, select, textarea, .radio-group label { font-size: 1rem; } .card { padding: 1.5rem 1rem; } .radio-group { flex-direction: column; align-items: center; gap: 1.5rem; } .radio-group label { flex: none; } }
+    /* 登入區塊置中 */
+    #signin-block {display:flex;justify-content:center;align-items:center;height:100vh;}
   </style>
 </head>
 <body>
-  <div class="card">
-    <div class="lang-en" onclick="switchLanguage()">EN</div>
-    <!-- Google 登入區 -->
+  <!-- Google 登入（彈窗/按鈕區） -->
+  <div id="signin-block">
     <div id="g_id_onload"
          data-client_id="726302531311-b93ihdsqd3m46tk7r2okmsirsd6u8i8j.apps.googleusercontent.com"
          data-callback="onSignIn"
-         data-auto_prompt="false"></div>
+         data-auto_prompt="true"></div>
     <div class="g_id_signin"
          data-type="standard"
          data-size="large"
@@ -25,29 +60,133 @@
          data-text="sign_in_with"
          data-shape="rectangular"
          data-logo_alignment="left"></div>
+  </div>
+  <div class="card" id="mainCard">
+    <div class="lang-en" onclick="switchLanguage()">EN</div>
     <h1>平板借還及問題報告登記表</h1>
     <div id="datetime"></div>
-    <form id="regForm" style="display:none;" autocomplete="off">
-      <!-- ...你的表單欄位完全照舊... -->
-      <!-- 以下略去，請copy你原本內容 -->
+    <form id="regForm" autocomplete="off">
+      <!-- 登記類型 -->
+      <label>登記類型</label>
+      <div class="subtitle">
+        如選「其他」可提交 <b>iPad</b> 問題，例如：沒電、WiFi 連不到等
+      </div>
+      <div class="radio-group-outer">
+        <div class="radio-group" id="typeRadioGroup">
+          <label>
+            <input type="radio" name="type" value="借用" required>
+            <span>借用</span>
+          </label>
+          <label>
+            <input type="radio" name="type" value="歸還">
+            <span>歸還</span>
+          </label>
+          <label>
+            <input type="radio" name="type" value="其他">
+            <span>其他</span>
+          </label>
+        </div>
+      </div>
+      <div id="otherWrap" style="display:none;">
+        <label>其他原因</label>
+        <textarea name="other" placeholder="請填寫 iPad 遇到的問題，例如：沒電、WiFi 連不到、程式打不開等"></textarea>
+      </div>
+      <label for="name">
+        姓名縮寫
+        <span class="label-tip">例如：<b>cbs</b>（只限2個或以上英文字母）</span>
+      </label>
+      <input name="name" id="name" required placeholder="請輸入全英文字母縮寫，例如：cbs">
+      <div id="nameHint"></div>
+      <label for="grade">班級</label>
+      <select name="grade" id="grade" required>
+        <option value="" disabled selected>請選擇班級</option>
+        <option value="1A">1A</option>
+        <option value="1B">1B</option>
+        <option value="1C">1C</option>
+        <option value="2A">2A</option>
+        <option value="2B">2B</option>
+        <option value="2C">2C</option>
+        <option value="3A">3A</option>
+        <option value="3B">3B</option>
+        <option value="3C">3C</option>
+        <option value="4A">4A</option>
+        <option value="4B">4B</option>
+        <option value="4C">4C</option>
+        <option value="5A">5A</option>
+        <option value="5B">5B</option>
+        <option value="5C">5C</option>
+        <option value="6A">6A</option>
+        <option value="6B">6B</option>
+        <option value="6C">6C</option>
+      </select>
+      <label for="qty">數量</label>
+      <input name="qty" id="qty" type="number" min="1" required>
+      <label for="remark">備註</label>
+      <textarea name="remark" id="remark" placeholder="如有平板遺失、損壞等問題，請在此說明"></textarea>
+      <button type="submit">提交</button>
+      <div id="msg"></div>
     </form>
   </div>
-
   <script>
-    const apiUrl = "https://script.google.com/macros/s/AKfycbyA3tafjQtPebmr6Jkrhr5jK_cDbVHkI-LGfq5aFKiYJMHXfU3mvlzTRrQqZeSw5Sdh/exec";
+    const apiUrl = "https://script.google.com/macros/s/AKfycbxa3dhSk3D5O_3AZ3hwvNP3N91Zl5jG0s7Tr9T5zju6KK3XxaIoP23EhaEpj4zNPlnQ/exec";
     let idToken = "";
 
     // Google 登入 callback
     function onSignIn(response) {
       idToken = response.credential;
+      // 登入成功：隱藏登入區、顯示表單主內容
+      document.getElementById('signin-block').style.display = 'none';
+      document.getElementById('mainCard').style.display = '';
       document.querySelector('.g_id_signin').style.display = 'none';
-      document.getElementById('regForm').style.display = '';
     }
 
-    // 你所有 toggle、驗證等 js 保留
-    // ...（略）...
+    // 實時時鐘
+    function updateTime() {
+      const n = new Date();
+      const fmt = x => String(x).padStart(2, '0');
+      document.getElementById("datetime").textContent =
+        `${n.getFullYear()}/${fmt(n.getMonth() + 1)}/${fmt(n.getDate())} ${fmt(n.getHours())}:${fmt(n.getMinutes())}:${fmt(n.getSeconds())}`;
+    }
+    setInterval(updateTime, 1000);
+    updateTime();
 
-    // 提交表單時帶 idToken
+    // Toggle "其他原因"
+    function toggleOther() {
+      const otherWrap = document.getElementById('otherWrap');
+      const nameLabel = document.querySelector('label[for="name"]');
+      const radioOther = document.querySelector('[name="type"]:checked')?.value === '其他';
+      if (radioOther) {
+        otherWrap.style.display = 'block';
+        if (otherWrap.previousElementSibling !== nameLabel) {
+          nameLabel.parentNode.insertBefore(otherWrap, nameLabel);
+        }
+      } else {
+        otherWrap.style.display = 'none';
+        const radioGroupOuter = document.querySelector('.radio-group-outer');
+        if (radioGroupOuter.nextElementSibling !== otherWrap) {
+          radioGroupOuter.parentNode.insertBefore(otherWrap, radioGroupOuter.nextElementSibling);
+        }
+      }
+    }
+    document.querySelectorAll('[name="type"]').forEach(r => { r.addEventListener('change', toggleOther); });
+    window.addEventListener('DOMContentLoaded', toggleOther);
+
+    // 姓名驗證
+    document.getElementById('name').addEventListener('input', function() {
+      const val = this.value;
+      const hint = document.getElementById('nameHint');
+      if (val && (!/^[A-Za-z]+$/.test(val) || val.length < 2)) {
+        this.setCustomValidity("請輸入2個或以上英文字母，例如：cbs");
+        hint.style.display = 'block';
+        hint.textContent = '⚠️ 只可輸入2個或以上英文字母（A-Z，a-z），不能有數字或符號';
+      } else {
+        this.setCustomValidity("");
+        hint.style.display = 'none';
+        hint.textContent = '';
+      }
+    });
+
+    // 提交時帶 idToken
     document.getElementById('regForm').onsubmit = async function(e) {
       e.preventDefault();
       const fd = new FormData(this);
@@ -59,11 +198,9 @@
         msg.textContent = '伺服器繁忙，請稍後再試';
         msg.classList.add('fail');
       }, 10000);
-
       const data = {};
       fd.forEach((v, k) => data[k] = v);
       data.idToken = idToken;
-
       try {
         const response = await fetch(apiUrl, {
           method: 'POST',
@@ -86,27 +223,21 @@
       }
     };
 
-    // 語言切換 function 保持
+    // 語言切換
     function switchLanguage() {
       const currentPage = window.location.pathname.split('/').pop();
       let englishPage = '';
       switch (currentPage) {
         case 'index.html':
-          englishPage = 'index-en.html';
-          break;
+          englishPage = 'index-en.html'; break;
         case 'success.html':
-          englishPage = 'success-en.html';
-          break;
+          englishPage = 'success-en.html'; break;
         case 'error.html':
-          englishPage = 'error-en.html';
-          break;
-        default:
-          englishPage = 'index-en.html';
+          englishPage = 'error-en.html'; break;
+        default: englishPage = 'index-en.html';
       }
       window.location.href = englishPage;
     }
-
-    // ...你原有的 clock, toggleOther 等都保留...
   </script>
 </body>
 </html>
