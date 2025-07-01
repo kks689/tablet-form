@@ -6,7 +6,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
-    /* 你的原有 CSS 全部保留 ... */
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Arial, '微軟正黑體', sans-serif;
@@ -19,7 +18,7 @@
       color: #1d1d1f;
     }
     .card { background: #fff; border-radius: 20px; padding: 2.5rem 2rem; max-width: 500px; width: 100%; margin: 2.5rem auto; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); display: flex; flex-direction: column; gap: 2rem; position: relative; display:none; }
-    .lang-en { position: absolute; top: 1rem; right: 1rem; font-size: 0.875rem; color: #0071e3; font-weight: 600; cursor: pointer; }
+    .lang-en { position: absolute; top: 1rem; right: 1rem; font-size: 0.875rem; color: #0071e3; font-weight: 600; cursor: pointer;}
     h1 { font-size: 2rem; font-weight: 600; text-align: center; letter-spacing: -0.02em; color: #1d1d1f; }
     #datetime { text-align: center; font-size: 1rem; color: #6e6e73; margin-bottom: 1.5rem; }
     .subtitle { font-size: 1rem; color: #6e6e73; line-height: 1.5; margin-bottom: 1.5rem; text-align: left; }
@@ -42,12 +41,11 @@
     #nameHint { color: #d70015; font-size: 0.875rem; margin-top: 0.25rem; margin-bottom: 0.75rem; display: none; }
     @media (max-width: 768px) { .card { padding: 2rem 1.5rem; margin: 1.5rem; } h1 { font-size: 1.75rem; } .radio-group { flex-direction: row; justify-content: space-around; } }
     @media (max-width: 480px) { h1 { font-size: 1.5rem; } label, input, select, textarea, .radio-group label { font-size: 1rem; } .card { padding: 1.5rem 1rem; } .radio-group { flex-direction: column; align-items: center; gap: 1.5rem; } .radio-group label { flex: none; } }
-    /* 登入區塊置中 */
     #signin-block {display:flex;justify-content:center;align-items:center;height:100vh;}
   </style>
 </head>
 <body>
-  <!-- Google 登入（彈窗/按鈕區） -->
+  <!-- Google 登入彈窗/按鈕區 -->
   <div id="signin-block">
     <div id="g_id_onload"
          data-client_id="726302531311-b93ihdsqd3m46tk7r2okmsirsd6u8i8j.apps.googleusercontent.com"
@@ -128,13 +126,13 @@
     </form>
   </div>
   <script>
+    // 用你提供的新 API 連結
     const apiUrl = "https://script.google.com/macros/s/AKfycbwHUIjW6KwoPgle7q225KLyqoq7eN7WwpYeuBX9V1snZcH15qmXyXRmLcewR0pItjLz/exec";
     let idToken = "";
 
     // Google 登入 callback
     function onSignIn(response) {
       idToken = response.credential;
-      // 登入成功：隱藏登入區、顯示表單主內容
       document.getElementById('signin-block').style.display = 'none';
       document.getElementById('mainCard').style.display = '';
       document.querySelector('.g_id_signin').style.display = 'none';
@@ -155,6 +153,7 @@
       const otherWrap = document.getElementById('otherWrap');
       const nameLabel = document.querySelector('label[for="name"]');
       const radioOther = document.querySelector('[name="type"]:checked')?.value === '其他';
+
       if (radioOther) {
         otherWrap.style.display = 'block';
         if (otherWrap.previousElementSibling !== nameLabel) {
@@ -168,7 +167,9 @@
         }
       }
     }
-    document.querySelectorAll('[name="type"]').forEach(r => { r.addEventListener('change', toggleOther); });
+    document.querySelectorAll('[name="type"]').forEach(r => {
+      r.addEventListener('change', toggleOther);
+    });
     window.addEventListener('DOMContentLoaded', toggleOther);
 
     // 姓名驗證
@@ -198,9 +199,11 @@
         msg.textContent = '伺服器繁忙，請稍後再試';
         msg.classList.add('fail');
       }, 10000);
+
       const data = {};
       fd.forEach((v, k) => data[k] = v);
       data.idToken = idToken;
+
       try {
         const response = await fetch(apiUrl, {
           method: 'POST',
@@ -229,12 +232,16 @@
       let englishPage = '';
       switch (currentPage) {
         case 'index.html':
-          englishPage = 'index-en.html'; break;
+          englishPage = 'index-en.html';
+          break;
         case 'success.html':
-          englishPage = 'success-en.html'; break;
+          englishPage = 'success-en.html';
+          break;
         case 'error.html':
-          englishPage = 'error-en.html'; break;
-        default: englishPage = 'index-en.html';
+          englishPage = 'error-en.html';
+          break;
+        default:
+          englishPage = 'index-en.html';
       }
       window.location.href = englishPage;
     }
