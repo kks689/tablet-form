@@ -281,6 +281,116 @@
   margin-top: 0.5rem;
   display: none;
   }
+  
+  /* 大螢幕桌面版優化 (1920x1080及以上) */
+  @media (min-width: 1440px) {
+  body {
+  padding: 3rem 2rem;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  }
+  .container {
+  max-width: 1200px;
+  width: 90%;
+  padding: 4rem 5rem;
+  margin: 2rem auto;
+  border-radius: 32px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  }
+  h1 {
+  font-size: 3rem;
+  margin-bottom: 1.5rem;
+  }
+  .subtitle {
+  font-size: 1.25rem;
+  margin-bottom: 3rem;
+  }
+  .datetime {
+  font-size: 1.125rem;
+  }
+  .form-group {
+  margin-bottom: 3.5rem;
+  }
+  label {
+  font-size: 1.25rem;
+  margin-bottom: 1.5rem;
+  }
+  .radio-group {
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  margin: 2rem 0;
+  }
+  .radio-option {
+  padding: 2rem;
+  border-radius: 20px;
+  min-height: 120px;
+  font-size: 1.125rem;
+  }
+  .radio-option input[type="radio"] {
+  width: 24px;
+  height: 24px;
+  margin-bottom: 1rem;
+  }
+  input, select, textarea {
+  font-size: 1.125rem;
+  padding: 1.5rem 1.25rem;
+  border-radius: 16px;
+  }
+  .submit-btn {
+  font-size: 1.25rem;
+  padding: 1.5rem 3rem;
+  border-radius: 20px;
+  margin-top: 2rem;
+  }
+  .lang-switcher {
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  border-radius: 12px;
+  top: 2rem;
+  right: 2rem;
+  }
+  /* 優化其他原因區域在大螢幕上的顯示 */
+  #otherSection {
+  margin-top: 2rem;
+  }
+  #otherSection textarea {
+  min-height: 120px;
+  font-size: 1.125rem;
+  }
+  }
+  
+  /* 超大螢幕優化 (2560px及以上) */
+  @media (min-width: 2560px) {
+  .container {
+  max-width: 1400px;
+  padding: 5rem 6rem;
+  }
+  h1 {
+  font-size: 3.5rem;
+  }
+  .subtitle {
+  font-size: 1.5rem;
+  }
+  .radio-group {
+  gap: 2.5rem;
+  }
+  .radio-option {
+  padding: 2.5rem;
+  min-height: 140px;
+  font-size: 1.25rem;
+  }
+  input, select, textarea {
+  font-size: 1.25rem;
+  padding: 1.75rem 1.5rem;
+  }
+  .submit-btn {
+  font-size: 1.375rem;
+  padding: 1.75rem 3.5rem;
+  }
+  }
+  
   @media (max-width: 1024px) {
   .container {
   max-width: 768px;
@@ -526,7 +636,7 @@
       });
     })();
 
-    const apiUrl = "https://script.google.com/macros/s/AKfycbzuBcMIbQLMx9pkn-NCusN9ZoZAWH1kGCVs6N3gZQfXTuA6XpVjrVD7pfd8v0a8oHZo/exec";
+    const apiUrl = "https://script.google.com/macros/s/AKfycbyyOPUkhMxlilg0nkIAiqtkjtdS3v1DF1JZyIlAim8mJpUMAsDBiAQLQS_rQ_cdK4iI2g/exec";
 
     // 防抖函數
     function debounce(func, wait) {
