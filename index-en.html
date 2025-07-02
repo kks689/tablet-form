@@ -729,10 +729,22 @@
         if (isTimeout) return;
         clearTimeout(timeoutId);
         
-        if (text.trim() === "OK") {
-          window.location.href = "success-en.html";
+        // 檢查響應是否成功
+        let isSuccess = false;
+        
+        // 嘗試解析JSON響應 (新版GAS v2.0)
+        try {
+          const jsonResponse = JSON.parse(text);
+          isSuccess = jsonResponse.status === "SUCCESS";
+        } catch (e) {
+          // 如果不是JSON，檢查是否為舊版的"OK"響應
+          isSuccess = text.trim() === "OK";
+        }
+        
+        if (isSuccess) {
+          window.location.href = "success-en.html?t=" + new Date().getTime();
         } else {
-          window.location.href = "error-en.html";
+          window.location.href = "error-en.html?t=" + new Date().getTime();
         }
       } catch (error) {
         if (isTimeout) return;
