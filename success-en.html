@@ -1,72 +1,363 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- 性能優化：預載入關鍵資源 -->
+  <link rel="preload" href="https://fonts.googleapis.com" as="connect" crossorigin>
+  <link rel="dns-prefetch" href="https://script.google.com">
+
   <meta charset="UTF-8">
+    <meta name="theme-color" content="#667eea">
+  <meta name="color-scheme" content="light">
   <title>Form Submitted</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <!-- 防快取設定 - 確保每次都載入最新內容 -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta name="cache-control" content="no-cache">
+  <meta name="expires" content="0">
+  <meta name="pragma" content="no-cache">
   <style>
-    body {
-      font-family: 'SF Pro Display', 'Segoe UI', 'Arial', 'microsft jhenghei', sans-serif;
-      background: linear-gradient(120deg, #f0f2f5 0%, #dbeafe 100%);
-      margin: 0; min-height: 100vh;
-    }
-    .card {
-      max-width: 390px;
-      margin: 7em auto;
-      background: #fff;
-      border-radius: 2.2rem;
-      box-shadow: 0 8px 32px #0001;
-      padding: 2.8em 1.7em;
-      text-align: center;
-      position: relative; /* 為 EN 標誌添加相對定位 */
-    }
-    .lang-en {
-      position: absolute;
-      top: 1rem;
-      right: 1rem;
-      font-size: 0.875rem;
-      color: #0071e3;
-      font-weight: 600;
-      cursor: pointer; /* 提示可點擊（未來可添加切換功能） */
-    }
-    h2 {
-      font-weight: 700; font-size: 1.6em; color: #1867c0;
-      margin-bottom: 0.5em; letter-spacing: 0.5px;
-    }
-    .icon {
-      font-size: 2.8em; color: #25bb5b; margin-bottom: 0.5em;
-    }
-    .desc {color: #444; font-size: 1.1em; margin-bottom: 2em;}
-    .btn {
-      background: #007aff; color: #fff; border: none; border-radius: 1.2em;
-      padding: 0.8em 2.5em; font-size: 1.08em; box-shadow: 0 2px 10px #007aff22;
-      cursor: pointer; margin-top: 0.5em;
-    }
-    .countdown {
-      font-size: 0.98em; color: #888; margin-top: 1.7em;
-    }
+  *, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  }
+  body {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif;
+  background: 
+  url('cyberpunk_background.png'),
+  linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background-size: 400px 400px, cover;
+  background-repeat: repeat, no-repeat;
+  background-blend-mode: overlay;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 3rem 2rem;
+  color: #1d1d1f;
+  position: relative;
+  }
+  body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: 
+  radial-gradient(circle at 20% 80%, rgba(52, 199, 89, 0.2) 0%, transparent 50%),
+  radial-gradient(circle at 80% 20%, rgba(120, 219, 255, 0.15) 0%, transparent 50%),
+  radial-gradient(circle at 40% 40%, rgba(120, 119, 198, 0.1) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: -1;
+  }
+  .container {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 28px;
+  padding: 4rem 3.5rem;
+  max-width: 500px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 
+  0 32px 64px rgba(0, 0, 0, 0.15),
+  0 16px 32px rgba(0, 0, 0, 0.08),
+  inset 0 1px 0 rgba(255, 255, 255, 0.8),
+  0 0 0 1px rgba(52, 199, 89, 0.3),
+  0 0 20px rgba(52, 199, 89, 0.2);
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  .container::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, 
+  rgba(52, 199, 89, 0.4) 0%, 
+  rgba(120, 219, 255, 0.3) 25%, 
+  rgba(52, 199, 89, 0.4) 50%, 
+  rgba(120, 219, 255, 0.3) 75%, 
+  rgba(52, 199, 89, 0.4) 100%);
+  border-radius: 30px;
+  z-index: -1;
+  animation: successGlow 2s ease-in-out infinite alternate;
+  }
+  @keyframes successGlow {
+  0% {
+  opacity: 0.6;
+  filter: blur(1px);
+  }
+  100% {
+  opacity: 0.9;
+  filter: blur(2px);
+  }
+  }
+  .lang-switcher {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  background: rgba(0, 113, 227, 0.1);
+  color: #0071e3;
+  border: none;
+  border-radius: 20px;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  }
+  .lang-switcher:hover {
+  background: rgba(0, 113, 227, 0.15);
+  transform: translate3d(0, -1px, 0);
+  }
+  .success-icon {
+  width: 90px;
+  height: 90px;
+  margin: 0 auto 2.5rem;
+  background: linear-gradient(135deg, #34c759 0%, #30d158 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  color: white;
+  box-shadow: 0 8px 24px rgba(52, 199, 89, 0.3);
+  animation: bounceIn 0.6s ease-out;
+  }
+  @keyframes bounceIn {
+  0% {
+  opacity: 0;
+  transform: scale(0.3);
+  }
+  50% {
+  opacity: 1;
+  transform: scale(1.05);
+  }
+  70% {
+  transform: scale(0.9);
+  }
+  100% {
+  opacity: 1;
+  transform: scale(1);
+  }
+  }
+  h1 {
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: #1d1d1f;
+  margin-bottom: 1.5rem;
+  letter-spacing: -0.02em;
+  }
+  .description {
+  font-size: 1.25rem;
+  color: #6e6e73;
+  line-height: 1.6;
+  margin-bottom: 3rem;
+  }
+  .action-btn {
+  background: linear-gradient(135deg, #007aff 0%, #0051d5 100%);
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  padding: 1.25rem 2.5rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 16px rgba(0, 122, 255, 0.3);
+  margin-bottom: 2rem;
+  }
+  .action-btn:hover {
+  transform: translate3d(0, -2px, 0);
+  box-shadow: 0 12px 24px rgba(0, 122, 255, 0.4);
+  }
+  .action-btn:active {
+  transform: translateY(0);
+  }
+  .countdown {
+  font-size: 1.125rem;
+  color: #86868b;
+  font-weight: 500;
+  }
+  .countdown-number {
+  color: #0071e3;
+  font-weight: 700;
+  }
+  @media (max-width: 1024px) {
+  .container {
+  max-width: 600px;
+  padding: 3.5rem 3rem;
+  }
+  h1 {
+  font-size: 2rem;
+  }
+  .description {
+  font-size: 1.125rem;
+  }
+  .action-btn {
+  font-size: 1.125rem;
+  padding: 1.125rem 2.25rem;
+  }
+  }
+  @media (max-width: 768px) {
+  body {
+  padding: 2rem 1rem;
+  }
+  .container {
+  padding: 3rem 2rem;
+  margin: 1rem;
+  border-radius: 24px;
+  }
+  h1 {
+  font-size: 1.875rem;
+  }
+  .success-icon {
+  width: 80px;
+  height: 80px;
+  font-size: 2.5rem;
+  margin-bottom: 2rem;
+  }
+  .description {
+  margin-bottom: 2.5rem;
+  }
+  .action-btn {
+  margin-bottom: 1.5rem;
+  }
+  .lang-switcher {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.8rem;
+  }
+  }
+  @media (max-width: 480px) {
+  body {
+  padding: 1rem;
+  }
+  .container {
+  padding: 2rem 1.5rem;
+  border-radius: 20px;
+  }
+  h1 {
+  font-size: 1.625rem;
+  }
+  .success-icon {
+  width: 70px;
+  height: 70px;
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  }
+  .description {
+  font-size: 1rem;
+  margin-bottom: 2rem;
+  }
+  .action-btn {
+  padding: 1rem 2rem;
+  font-size: 1.125rem;
+  margin-bottom: 1rem;
+  }
+  .countdown {
+  font-size: 1rem;
+  }
+  }
   </style>
 </head>
 <body>
-  <div class="card">
-    <div class="lang-en">EN</div> <!-- 添加 EN 標誌 -->
-    <div class="icon">✔️</div>
-    <h2>Your Response Has Been Received!</h2>
-    <div class="desc">Thank you for filling out the form. We have received your data.</div>
-    <button class="btn" onclick="window.location.href='index-en.html'">Back to Home</button>
-    <div class="countdown"><span id="sec">5</span> seconds until automatic return to home</div>
-  </div>
-  <script>
-    let s = 5;
-    const sec = document.getElementById('sec');
-    const timer = setInterval(() => {
-      s--;
-      sec.textContent = s;
-      if (s === 0) {
-        clearInterval(timer);
-        window.location.href = "index-en.html";
+    <div class="container">
+      <h1 class="status-title">Form Submitted Successfully!</h1>
+      <p class="status-message">Thank you for your submission. We have received your information.</p>
+      <p class="redirect-message">You will be redirected to the homepage in <span id="countdown">5</span> seconds...</p>
+    </div>
+
+    <script>
+    // 防快取機制 - 確保頁面總是載入最新版本
+    (function() {
+      // 清除所有快取
+      if ('caches' in window) {
+        caches.keys().then(function(names) {
+          names.forEach(function(name) {
+            caches.delete(name);
+          });
+        });
       }
-    }, 1000);
-  </script>
+      
+      // 添加時間戳到所有資源請求
+      const timestamp = new Date().getTime();
+      
+      // 為頁面添加版本參數
+      if (window.location.search.indexOf('v=') === -1) {
+        const separator = window.location.search ? '&' : '?';
+        const newUrl = window.location.href + separator + 'v=' + timestamp;
+        // 只在首次載入時添加版本參數，避免無限重新載入
+        if (!sessionStorage.getItem('cache_busted')) {
+          sessionStorage.setItem('cache_busted', 'true');
+          window.location.replace(newUrl);
+          return;
+        }
+      }
+      
+      // 強制重新載入外部資源
+      document.addEventListener('DOMContentLoaded', function() {
+        // 重新載入所有CSS
+        const links = document.querySelectorAll('link[rel="stylesheet"]');
+        links.forEach(function(link) {
+          const href = link.href;
+          if (href.indexOf('?') > -1) {
+            link.href = href + '&t=' + timestamp;
+          } else {
+            link.href = href + '?t=' + timestamp;
+          }
+        });
+        
+        // 重新載入所有圖片
+        const images = document.querySelectorAll('img');
+        images.forEach(function(img) {
+          if (img.src) {
+            const src = img.src;
+            if (src.indexOf('?') > -1) {
+              img.src = src + '&t=' + timestamp;
+            } else {
+              img.src = src + '?t=' + timestamp;
+            }
+          }
+        });
+      });
+      
+      // 清除瀏覽器快取
+      if (window.applicationCache) {
+        window.applicationCache.update();
+      }
+      
+      // 設定頁面卸載時清除快取
+      window.addEventListener('beforeunload', function() {
+        if ('caches' in window) {
+          caches.keys().then(function(names) {
+            names.forEach(function(name) {
+              caches.delete(name);
+            });
+          });
+        }
+      });
+    })();
+
+      let countdown = 5;
+      const countdownElement = document.getElementById("countdown");
+
+      function updateCountdown() {
+        countdownElement.textContent = countdown;
+        if (countdown === 0) {
+          window.location.href = "index-en.html"; 
+        } else {
+          countdown--;
+          setTimeout(updateCountdown, 1000);
+        }
+      }
+
+      window.onload = updateCountdown;
+    </script>
 </body>
 </html>
+
