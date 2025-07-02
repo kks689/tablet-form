@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <!-- 性能優化：預載入關鍵資源 -->
+  <link rel="preload" href="https://fonts.googleapis.com" as="connect" crossorigin>
+  <link rel="dns-prefetch" href="https://script.google.com">
+
+  <meta charset="UTF-8">
+    <meta name="theme-color" content="#667eea">
+  <meta name="color-scheme" content="light">
+  <title>平板借還及問題報告登記表</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <!-- 防快取設定 - 確保每次都載入最新內容 -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta name="cache-control" content="no-cache">
+  <meta name="expires" content="0">
+  <meta name="pragma" content="no-cache">
+  <style>
+  *, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  }
+  body {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Arial, '微軟正黑體', sans-serif;
+  background: 
+  url('cyberpunk_background.png'),
+  linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background-size: 400px 400px, cover;
+  background-repeat: repeat, no-repeat;
+  background-blend-mode: overlay;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 3rem 2rem;
+  color: #1d1d1f;
+  line-height: 1.7;
+  position: relative;
+  }
+  body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: 
+  radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+  radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.15) 0%, transparent 50%),
+  radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.1) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: -1;
+  }
+  .container {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 28px;
+  padding: 4rem 3.5rem;
+  max-width: 600px;
+  width: 100%;
+  box-shadow: 
+  0 32px 64px rgba(0, 0, 0, 0.15),
+  0 16px 32px rgba(0, 0, 0, 0.08),
+  inset 0 1px 0 rgba(255, 255, 255, 0.8),
+  0 0 0 1px rgba(120, 119, 198, 0.2),
+  0 0 20px rgba(120, 219, 255, 0.1);
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  .container::before {
+      will-change: opacity, filter;
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, 
+  rgba(120, 119, 198, 0.3) 0%, 
+  rgba(255, 119, 198, 0.2) 25%, 
+  rgba(120, 219, 255, 0.3) 50%, 
+  rgba(120, 119, 198, 0.2) 75%, 
+  rgba(255, 119, 198, 0.3) 100%);
+  border-radius: 30px;
+  z-index: -1;
+  animation: cyberpunkGlow 3s ease-in-out infinite alternate;
+  }
+  @keyframes cyberpunkGlow {
+  0% {
+  opacity: 0.5;
+  filter: blur(1px);
+  }
+  100% {
+  opacity: 0.8;
+  filter: blur(2px);
+  }
+  }
+  .lang-switcher {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  background: rgba(0, 113, 227, 0.1);
+  color: #0071e3;
+  border: none;
+  border-radius: 20px;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  }
+  .lang-switcher:hover {
+  background: rgba(0, 113, 227, 0.15);
+  transform: translate3d(0, -1px, 0);
+  }
+  .header {
+  text-align: center;
+  margin-bottom: 3.5rem;
+  }
+  h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #1d1d1f;
+  margin-bottom: 1rem;
+  letter-spacing: -0.02em;
+  }
+  .datetime {
+  font-size: 1.125rem;
+  color: #86868b;
+  font-weight: 500;
+  margin-bottom: 1.5rem;
+  }
+  .subtitle {
+  font-size: 1.25rem;
+  color: #6e6e73;
+  line-height: 1.6;
+  margin-bottom: 2.5rem;
+  text-align: left;
+  }
+  .form-group {
+  margin-bottom: 3rem;
+  }
+  label {
+  display: block;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1d1d1f;
+  margin-bottom: 1rem;
+  }
+  .label-tip {
+  font-size: 1rem;
+  color: #86868b;
+  font-weight: 400;
+  margin-left: 0.5rem;
+  }
+  input, select, textarea {
+  width: 100%;
+  padding: 1.375rem 1.25rem;
+  border: 2px solid #e5e5e7;
+  border-radius: 18px;
+  font-size: 1.25rem;
+  background: #fff;
+  transition: all 0.3s ease;
+  font-family: inherit;
+  }
+  input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: #0071e3;
+  box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1);
+  transform: translate3d(0, -1px, 0);
+  }
+  select:invalid {
+  color: #86868b;
+  }
+  textarea {
+  min-height: 120px;
+  resize: vertical;
+  }
+  .radio-container {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 24px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  }
+  .radio-group {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  }
+  .radio-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  cursor: pointer;
+  padding: 1.5rem;
+  border-radius: 20px;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.8);
+  border: 2px solid transparent;
+  }
+  .radio-option:hover {
+  background: rgba(255, 255, 255, 1);
+  transform: translate3d(0, -2px, 0);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  }
+  .radio-option input[type="radio"] {
+  width: 1.5rem;
+  height: 1.5rem;
+  margin-bottom: 0.5rem;
+  accent-color: #0071e3;
+  cursor: pointer;
+  }
+  .radio-option input[type="radio"]:checked + span {
+  color: #0071e3;
+  font-weight: 700;
+  }
+  .radio-option.selected {
+  background: rgba(0, 113, 227, 0.1);
+  border-color: #0071e3;
+  }
+  .radio-option span {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1d1d1f;
+  transition: color 0.3s ease;
+  }
+  .other-section {
+  display: none;
+  animation: fadeIn 0.3s ease;
+  }
+  @keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+  }
+  .submit-btn {
+  background: linear-gradient(135deg, #007aff 0%, #0051d5 100%);
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  padding: 1.5rem 2.5rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+  margin-top: 2rem;
+  box-shadow: 0 8px 16px rgba(0, 122, 255, 0.3);
+  }
+  .submit-btn:hover {
+  transform: translate3d(0, -2px, 0);
+  box-shadow: 0 12px 24px rgba(0, 122, 255, 0.4);
+  }
+  .submit-btn:active {
+  transform: translateY(0);
+  }
+  .submit-btn:disabled {
+  background: #86868b;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+  }
+  .message {
+  text-align: center;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #0071e3;
+  min-height: 1.5rem;
+  margin-top: 1rem;
+  }
+  .message.error {
+  color: #ff3b30;
+  }
+  .hint {
+  color: #ff3b30;
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+  display: none;
+  }
+  
+  /* 大螢幕桌面版優化 (1920x1080及以上) */
+  @media (min-width: 1440px) {
+  body {
+  padding: 3rem 2rem;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  }
+  .container {
+  max-width: 1200px;
+  width: 90%;
+  padding: 4rem 5rem;
+  margin: 2rem auto;
+  border-radius: 32px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  }
+  h1 {
+  font-size: 3rem;
+  margin-bottom: 1.5rem;
+  }
+  .subtitle {
+  font-size: 1.25rem;
+  margin-bottom: 3rem;
+  }
+  .datetime {
+  font-size: 1.125rem;
+  }
+  .form-group {
+  margin-bottom: 3.5rem;
+  }
+  label {
+  font-size: 1.25rem;
+  margin-bottom: 1.5rem;
+  }
+  .radio-group {
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  margin: 2rem 0;
+  }
+  .radio-option {
+  padding: 2rem;
+  border-radius: 20px;
+  min-height: 120px;
+  font-size: 1.125rem;
+  }
+  .radio-option input[type="radio"] {
+  width: 24px;
+  height: 24px;
+  margin-bottom: 1rem;
+  }
+  input, select, textarea {
+  font-size: 1.125rem;
+  padding: 1.5rem 1.25rem;
+  border-radius: 16px;
+  }
+  .submit-btn {
+  font-size: 1.25rem;
+  padding: 1.5rem 3rem;
+  border-radius: 20px;
+  margin-top: 2rem;
+  }
+  .lang-switcher {
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  border-radius: 12px;
+  top: 2rem;
+  right: 2rem;
+  }
+  /* 優化其他原因區域在大螢幕上的顯示 */
+  #otherSection {
+  margin-top: 2rem;
+  }
+  #otherSection textarea {
+  min-height: 120px;
+  font-size: 1.125rem;
+  }
+  }
+  
+  /* 超大螢幕優化 (2560px及以上) */
+  @media (min-width: 2560px) {
+  .container {
+  max-width: 1400px;
+  padding: 5rem 6rem;
+  }
+  h1 {
+  font-size: 3.5rem;
+  }
+  .subtitle {
+  font-size: 1.5rem;
+  }
+  .radio-group {
+  gap: 2.5rem;
+  }
+  .radio-option {
+  padding: 2.5rem;
+  min-height: 140px;
+  font-size: 1.25rem;
+  }
+  input, select, textarea {
+  font-size: 1.25rem;
+  padding: 1.75rem 1.5rem;
+  }
+  .submit-btn {
+  font-size: 1.375rem;
+  padding: 1.75rem 3.5rem;
+  }
+  }
+  
+  @media (max-width: 1024px) {
+  .container {
+  max-width: 768px;
+  padding: 3.5rem 3rem;
+  }
+  h1 {
+  font-size: 2.25rem;
+  }
+  .subtitle {
+  font-size: 1.125rem;
+  }
+  label {
+  font-size: 1.125rem;
+  }
+  input, select, textarea {
+  font-size: 1.125rem;
+  padding: 1.25rem 1.125rem;
+  }
+  .submit-btn {
+  font-size: 1.125rem;
+  padding: 1.375rem 2.25rem;
+  }
+  }
+  @media (max-width: 768px) {
+  body {
+  padding: 2rem 1rem;
+  }
+  .container {
+  padding: 3rem 2rem;
+  margin: 1rem;
+  border-radius: 24px;
+  }
+  h1 {
+  font-size: 2rem;
+  }
+  .form-group {
+  margin-bottom: 2.5rem;
+  }
+  .radio-group {
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  }
+  .radio-option {
+  flex-direction: row;
+  justify-content: flex-start;
+  text-align: left;
+  padding: 1.25rem;
+  }
+  .radio-option input[type="radio"] {
+  margin-right: 1rem;
+  margin-bottom: 0;
+  }
+  .lang-switcher {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.8rem;
+  }
+  }
+  @media (max-width: 480px) {
+  body {
+  padding: 1rem;
+  }
+  .container {
+  padding: 2rem 1.5rem;
+  border-radius: 20px;
+  }
+  h1 {
+  font-size: 1.75rem;
+  }
+  .form-group {
+  margin-bottom: 2rem;
+  }
+  .radio-option {
+  padding: 1rem;
+  }
+  .submit-btn {
+  padding: 1.25rem 2rem;
+  }
+  }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <button class="lang-switcher" onclick="switchLanguage()">EN</button>
+    
+    <div class="header">
+      <h1>平板借還及問題報告登記表</h1>
+      <div class="datetime" id="datetime"></div>
+    </div>
+
+    <form id="regForm" autocomplete="off">
+      <!-- 登記類型 -->
+      <div class="form-group">
+        <label>登記類型</label>
+        <div class="subtitle">
+          如選「其他」可提交 <strong>iPad</strong> 問題，例如：沒電、WiFi 連不到等
+        </div>
+        <div class="radio-container">
+          <div class="radio-group">
+            <label class="radio-option">
+              <input type="radio" name="type" value="借用" required>
+              <span>借用</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="type" value="歸還">
+              <span>歸還</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="type" value="其他">
+              <span>其他</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- 其他原因 -->
+      <div class="form-group other-section" id="otherSection">
+        <label>其他原因</label>
+        <textarea name="other" placeholder="請填寫 iPad 遇到的問題，例如：沒電、WiFi 連不到、程式打不開等"></textarea>
+      </div>
+
+      <!-- 姓名縮寫 -->
+      <div class="form-group">
+        <label for="name">
+          姓名縮寫
+          <span class="label-tip">例如：<strong>cbs</strong>（只限2個或以上英文字母）</span>
+        </label>
+        <input name="name" id="name" required placeholder="請輸入全英文字母縮寫，例如：cbs">
+        <div class="hint" id="nameHint">⚠️ 只可輸入2個或以上英文字母（A-Z，a-z），不能有數字或符號</div>
+      </div>
+
+      <!-- 班級 -->
+      <div class="form-group">
+        <label for="grade">班級</label>
+        <select name="grade" id="grade" required>
+          <option value="" disabled selected>請選擇班級</option>
+          <option value="1A">1A</option>
+          <option value="1B">1B</option>
+          <option value="1C">1C</option>
+          <option value="2A">2A</option>
+          <option value="2B">2B</option>
+          <option value="2C">2C</option>
+          <option value="3A">3A</option>
+          <option value="3B">3B</option>
+          <option value="3C">3C</option>
+          <option value="4A">4A</option>
+          <option value="4B">4B</option>
+          <option value="4C">4C</option>
+          <option value="5A">5A</option>
+          <option value="5B">5B</option>
+          <option value="5C">5C</option>
+          <option value="6A">6A</option>
+          <option value="6B">6B</option>
+          <option value="6C">6C</option>
+        </select>
+      </div>
+
+      <!-- 數量 -->
+      <div class="form-group">
+        <label for="qty">數量</label>
+        <input name="qty" id="qty" type="number" min="1" required>
+      </div>
+
+      <!-- 備註 -->
+      <div class="form-group">
+        <label for="remark">備註</label>
+        <textarea name="remark" id="remark" placeholder="如有平板遺失、損壞等問題，請在此說明"></textarea>
+      </div>
+
+      <!-- 提交按鈕 -->
+      <button type="submit" class="submit-btn" id="submitBtn">提交</button>
+      <div class="message" id="message"></div>
+    </form>
+  </div>
+
+  <script>
+    // 防快取機制 - 確保頁面總是載入最新版本
+    (function() {
+      // 清除所有快取
+      if ('caches' in window) {
+        caches.keys().then(function(names) {
+          names.forEach(function(name) {
+            caches.delete(name);
+          });
+        });
+      }
+      
+      // 添加時間戳到所有資源請求
+      const timestamp = new Date().getTime();
+      
+      // 為頁面添加版本參數
+      if (window.location.search.indexOf('v=') === -1) {
+        const separator = window.location.search ? '&' : '?';
+        const newUrl = window.location.href + separator + 'v=' + timestamp;
+        // 只在首次載入時添加版本參數，避免無限重新載入
+        if (!sessionStorage.getItem('cache_busted')) {
+          sessionStorage.setItem('cache_busted', 'true');
+          window.location.replace(newUrl);
+          return;
+        }
+      }
+      
+      // 強制重新載入外部資源
+      document.addEventListener('DOMContentLoaded', function() {
+        // 重新載入所有CSS
+        const links = document.querySelectorAll('link[rel="stylesheet"]');
+        links.forEach(function(link) {
+          const href = link.href;
+          if (href.indexOf('?') > -1) {
+            link.href = href + '&t=' + timestamp;
+          } else {
+            link.href = href + '?t=' + timestamp;
+          }
+        });
+        
+        // 重新載入所有圖片
+        const images = document.querySelectorAll('img');
+        images.forEach(function(img) {
+          if (img.src) {
+            const src = img.src;
+            if (src.indexOf('?') > -1) {
+              img.src = src + '&t=' + timestamp;
+            } else {
+              img.src = src + '?t=' + timestamp;
+            }
+          }
+        });
+      });
+      
+      // 清除瀏覽器快取
+      if (window.applicationCache) {
+        window.applicationCache.update();
+      }
+      
+      // 設定頁面卸載時清除快取
+      window.addEventListener('beforeunload', function() {
+        if ('caches' in window) {
+          caches.keys().then(function(names) {
+            names.forEach(function(name) {
+              caches.delete(name);
+            });
+          });
+        }
+      });
+    })();
+
+    const apiUrl = "https://script.google.com/macros/s/AKfycbyyOPUkhMxlilg0nkIAiqtkjtdS3v1DF1JZyIlAim8mJpUMAsDBiAQLQS_rQ_cdK4iI2g/exec";
+
+    // 防抖函數
+    function debounce(func, wait) {
+      let timeout;
+      return function executedFunction(...args) {
+        const later = () => {
+          clearTimeout(timeout);
+          func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+      };
+    }
+
+    // Real-time clock (優化為每5秒更新)
+    function updateTime() {
+      const now = new Date();
+      const formatter = (num) => String(num).padStart(2, '0');
+      document.getElementById("datetime").textContent =
+        `${now.getFullYear()}/${formatter(now.getMonth() + 1)}/${formatter(now.getDate())} ${formatter(now.getHours())}:${formatter(now.getMinutes())}:${formatter(now.getSeconds())}`;
+    }
+    setInterval(updateTime, 5000);
+    updateTime();
+
+    // Radio button interactions
+    document.querySelectorAll('input[name="type"]').forEach(radio => {
+      radio.addEventListener('change', function() {
+        // Update visual state
+        document.querySelectorAll('.radio-option').forEach(option => {
+          option.classList.remove('selected');
+        });
+        this.closest('.radio-option').classList.add('selected');
+
+        // Toggle other section
+        const otherSection = document.getElementById('otherSection');
+        if (this.value === '其他') {
+          otherSection.style.display = 'block';
+        } else {
+          otherSection.style.display = 'none';
+        }
+      });
+    });
+
+    // Name validation with debounce
+    const debouncedValidation = debounce(function() {
+      const nameInput = document.getElementById('name');
+      const value = nameInput.value;
+      const hint = document.getElementById('nameHint');
+      
+      if (value && (!/^[A-Za-z]+$/.test(value) || value.length < 2)) {
+        nameInput.setCustomValidity("請輸入2個或以上英文字母，例如：cbs");
+        if (hint) hint.style.display = 'block';
+      } else {
+        nameInput.setCustomValidity("");
+        if (hint) hint.style.display = 'none';
+      }
+    }, 300);
+
+    document.getElementById('name').addEventListener('input', debouncedValidation);
+
+    // Form submission
+    document.getElementById('regForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const formData = new FormData(this);
+      const message = document.getElementById('message');
+      const submitBtn = document.getElementById('submitBtn');
+      let isTimeout = false;
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = '提交中...';
+      message.textContent = '請稍候... 正在提交中';
+      message.classList.remove('error');
+
+      const timeoutId = setTimeout(() => {
+        isTimeout = true;
+        message.textContent = '伺服器繁忙，請稍後再試';
+        message.classList.add('error');
+        submitBtn.disabled = false;
+        submitBtn.textContent = '提交';
+      }, 15000);
+
+      try {
+        const response = await fetch(apiUrl + "?t=" + new Date().getTime(), { 
+          method: 'POST', 
+          body: formData 
+        });
+        const text = await response.text();
+        
+        if (isTimeout) return;
+        clearTimeout(timeoutId);
+        
+        if (text.trim() === "OK") {
+          window.location.href = "success.html?t=" + new Date().getTime();
+        } else {
+          window.location.href = "error.html?t=" + new Date().getTime();
+        }
+      } catch (error) {
+        if (isTimeout) return;
+        clearTimeout(timeoutId);
+        message.textContent = '提交失敗，請稍後再試';
+        message.classList.add('error');
+        submitBtn.disabled = false;
+        submitBtn.textContent = '提交';
+      }
+    });
+
+    // Language switch function
+    function switchLanguage() {
+      window.location.href = 'index-en.html?t=' + new Date().getTime();
+    }
+  </script>
+</body>
+</html>
+
