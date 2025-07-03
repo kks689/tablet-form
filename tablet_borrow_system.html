@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <title>平板借還系統</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="https://unpkg.com/@zxing/library@latest/umd/index.min.js"></script>
+  <script src="https://unpkg.com/@zxing/library@latest"></script>
   <style>
     /* Reset and Base Styles */
     *, *::before, *::after {
@@ -25,7 +25,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      padding: 2rem 1rem;
+      padding: 3rem 2rem;
       color: #1d1d1f;
       line-height: 1.7;
       position: relative;
@@ -50,253 +50,334 @@
       background: rgba(255, 255, 255, 0.95);
       backdrop-filter: blur(20px);
       border-radius: 28px;
-      padding: 3rem 2.5rem;
-      max-width: 700px;
+      padding: 4rem 3.5rem;
+      max-width: 600px;
       width: 100%;
-      box-shadow: 
-        0 32px 64px rgba(0, 0, 0, 0.15),
-        0 16px 32px rgba(0, 0, 0, 0.08),
-        inset 0 1px 0 rgba(255, 255, 255, 0.8),
-        0 0 0 1px rgba(120, 119, 198, 0.2),
-        0 0 20px rgba(120, 219, 255, 0.1);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
       position: relative;
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      overflow: hidden;
+      z-index: 1;
     }
 
     .container::before {
       content: '';
       position: absolute;
-      top: -2px;
-      left: -2px;
-      right: -2px;
-      bottom: -2px;
-      background: linear-gradient(45deg, 
-        rgba(120, 119, 198, 0.3) 0%, 
-        rgba(255, 119, 198, 0.2) 25%, 
-        rgba(120, 219, 255, 0.3) 50%, 
-        rgba(120, 119, 198, 0.2) 75%, 
-        rgba(255, 119, 198, 0.3) 100%);
-      border-radius: 30px;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        linear-gradient(45deg, rgba(255, 255, 255, 0) 40%, rgba(255, 255, 255, 0.3) 50%, rgba(255, 255, 255, 0) 60%);
       z-index: -1;
-      animation: cyberpunkGlow 3s ease-in-out infinite alternate;
+      animation: shimmer 3s infinite;
+      transform: skewX(-20deg);
     }
 
-    @keyframes cyberpunkGlow {
-      0% {
-        opacity: 0.5;
-        filter: blur(1px);
-      }
-      100% {
-        opacity: 0.8;
-        filter: blur(2px);
-      }
-    }
-
-    .header {
-      text-align: center;
-      margin-bottom: 2.5rem;
+    @keyframes shimmer {
+      0% { transform: translateX(-150%) skewX(-20deg); }
+      100% { transform: translateX(150%) skewX(-20deg); }
     }
 
     h1 {
-      font-size: 2.2rem;
+      font-size: 2.5rem;
       font-weight: 700;
-      color: #1d1d1f;
-      margin-bottom: 0.5rem;
-      letter-spacing: -0.02em;
-    }
-
-    .datetime {
-      font-size: 1.1rem;
-      color: #86868b;
-      font-weight: 500;
       margin-bottom: 1rem;
+      text-align: center;
+      background: linear-gradient(135deg, #5f72bd 0%, #9b23ea 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      position: relative;
     }
 
-    .subtitle {
-      font-size: 1rem;
-      color: #6e6e73;
-      line-height: 1.6;
-    }
-
-    .form-group {
+    .timestamp {
+      text-align: center;
+      font-size: 1.1rem;
+      color: #666;
       margin-bottom: 2rem;
     }
 
-    label {
-      display: block;
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: #1d1d1f;
-      margin-bottom: 0.8rem;
+    .subtitle {
+      text-align: center;
+      font-size: 1rem;
+      color: #666;
+      margin-bottom: 2.5rem;
     }
 
-    .label-tip {
-      font-size: 0.9rem;
-      color: #86868b;
-      font-weight: 400;
-      margin-left: 0.5rem;
-    }
-
-    input, select, textarea {
-      width: 100%;
-      padding: 1.2rem 1rem;
-      border: 2px solid #e5e5e7;
+    .form-section {
+      margin-bottom: 2rem;
       border-radius: 16px;
-      font-size: 1.1rem;
-      background: #fff;
+      padding: 1.5rem;
+      background: rgba(240, 240, 255, 0.5);
+      border: 1px solid rgba(200, 200, 255, 0.3);
+    }
+
+    .form-section-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      color: #5f72bd;
+      border-bottom: 2px solid rgba(95, 114, 189, 0.2);
+      padding-bottom: 0.5rem;
+    }
+
+    .radio-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .radio-option {
+      flex: 1;
+      min-width: 150px;
+      background: white;
+      border: 2px solid rgba(95, 114, 189, 0.2);
+      border-radius: 12px;
+      padding: 1rem;
+      text-align: center;
+      cursor: pointer;
       transition: all 0.3s ease;
-      font-family: inherit;
+      position: relative;
+      overflow: hidden;
     }
 
-    input:focus, select:focus, textarea:focus {
+    .radio-option.selected {
+      border-color: #5f72bd;
+      background: rgba(95, 114, 189, 0.05);
+      box-shadow: 0 5px 15px rgba(95, 114, 189, 0.1);
+    }
+
+    .radio-option input {
+      position: absolute;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .radio-option label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-weight: 500;
+      color: #444;
+    }
+
+    .radio-option.selected label {
+      color: #5f72bd;
+      font-weight: 600;
+    }
+
+    .radio-option .icon {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+      transition: transform 0.3s ease;
+    }
+
+    .radio-option:hover .icon {
+      transform: scale(1.1);
+    }
+
+    .radio-option.selected .icon {
+      transform: scale(1.2);
+      color: #5f72bd;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: #444;
+    }
+
+    .form-group input[type="text"],
+    .form-group textarea {
+      width: 100%;
+      padding: 1rem;
+      border: 2px solid rgba(95, 114, 189, 0.2);
+      border-radius: 12px;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      background: white;
+    }
+
+    .form-group input[type="text"]:focus,
+    .form-group textarea:focus {
       outline: none;
-      border-color: #0071e3;
-      box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1);
-      transform: translateY(-1px);
+      border-color: #5f72bd;
+      box-shadow: 0 0 0 3px rgba(95, 114, 189, 0.1);
     }
 
-    select:invalid {
-      color: #86868b;
-    }
-
-    textarea {
+    .form-group textarea {
       min-height: 100px;
       resize: vertical;
     }
 
-    .radio-container {
-      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-      border-radius: 20px;
-      padding: 1.5rem;
-      margin-bottom: 1.5rem;
-      border: 1px solid rgba(0, 0, 0, 0.05);
-    }
-
-    .radio-group {
+    .checkbox-group {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
       gap: 1rem;
+      margin-bottom: 1rem;
     }
 
-    .radio-option {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
+    .checkbox-option {
+      background: white;
+      border: 2px solid rgba(95, 114, 189, 0.2);
+      border-radius: 12px;
+      padding: 0.8rem 1rem;
       cursor: pointer;
-      padding: 1.2rem;
-      border-radius: 16px;
       transition: all 0.3s ease;
-      background: rgba(255, 255, 255, 0.8);
-      border: 2px solid transparent;
+      position: relative;
+      display: flex;
+      align-items: center;
     }
 
-    .radio-option:hover {
-      background: rgba(255, 255, 255, 1);
-      transform: translateY(-2px);
-      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    .checkbox-option.checked {
+      border-color: #5f72bd;
+      background: rgba(95, 114, 189, 0.05);
+      box-shadow: 0 5px 15px rgba(95, 114, 189, 0.1);
     }
 
-    .radio-option input[type="radio"] {
-      width: 1.3rem;
-      height: 1.3rem;
-      margin-bottom: 0.5rem;
-      accent-color: #0071e3;
+    .checkbox-option input {
+      margin-right: 10px;
+    }
+
+    .checkbox-option label {
       cursor: pointer;
+      font-weight: 500;
+      color: #444;
+      flex: 1;
     }
 
-    .radio-option input[type="radio"]:checked + span {
-      color: #0071e3;
-      font-weight: 700;
-    }
-
-    .radio-option.selected {
-      background: rgba(0, 113, 227, 0.1);
-      border-color: #0071e3;
-    }
-
-    .radio-option span {
-      font-size: 1rem;
+    .checkbox-option.checked label {
+      color: #5f72bd;
       font-weight: 600;
-      color: #1d1d1f;
-      transition: color 0.3s ease;
     }
 
     .qr-section {
-      background: linear-gradient(135deg, #e8f4fd 0%, #d1e7dd 100%);
-      border-radius: 20px;
-      padding: 1.5rem;
       margin-bottom: 1.5rem;
-      border: 1px solid rgba(0, 113, 227, 0.1);
     }
 
-    .qr-controls {
+    .qr-buttons {
       display: flex;
       gap: 1rem;
       margin-bottom: 1rem;
     }
 
     .qr-btn {
-      background: linear-gradient(135deg, #007aff 0%, #0051d5 100%);
-      color: #fff;
+      flex: 1;
+      background: #5f72bd;
+      color: white;
       border: none;
       border-radius: 12px;
-      padding: 0.8rem 1.5rem;
+      padding: 0.8rem 1rem;
       font-size: 1rem;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.3s ease;
-      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .qr-btn:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 6px 12px rgba(0, 122, 255, 0.3);
+      background: #4a5d9d;
+      transform: translateY(-2px);
     }
 
-    .qr-btn:disabled {
-      background: #86868b;
-      cursor: not-allowed;
-      transform: none;
-      box-shadow: none;
+    .qr-btn:active {
+      transform: translateY(0);
     }
 
-    .qr-btn.stop {
-      background: linear-gradient(135deg, #ff3b30 0%, #d70015 100%);
+    #stopQrBtn {
+      background: #e74c3c;
+      display: none;
+    }
+
+    #stopQrBtn:hover {
+      background: #c0392b;
     }
 
     #qr-video {
       width: 100%;
-      max-width: 300px;
-      height: 200px;
       border-radius: 12px;
-      background: #000;
-      margin: 0 auto;
       display: none;
+      margin-bottom: 1rem;
     }
 
-    .qr-result {
-      background: rgba(52, 199, 89, 0.1);
-      border: 1px solid rgba(52, 199, 89, 0.3);
+    #qr-result {
+      background: rgba(95, 114, 189, 0.1);
       border-radius: 12px;
       padding: 1rem;
-      margin-top: 1rem;
+      margin-bottom: 1rem;
       display: none;
+      animation: fadeIn 0.5s ease;
     }
 
-    .qr-result.show {
+    #qr-result.show {
       display: block;
     }
 
-    .qr-result-text {
-      color: #1d6f42;
+    .submit-btn {
+      background: linear-gradient(135deg, #5f72bd 0%, #9b23ea 100%);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 1rem 2rem;
+      font-size: 1.1rem;
       font-weight: 600;
-      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: block;
+      width: 100%;
+      margin-top: 2rem;
+      position: relative;
+      overflow: hidden;
     }
 
-    .other-section {
-      display: none;
-      animation: fadeIn 0.3s ease;
+    .submit-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(45deg, rgba(255, 255, 255, 0) 40%, rgba(255, 255, 255, 0.3) 50%, rgba(255, 255, 255, 0) 60%);
+      z-index: 1;
+      animation: shimmer 3s infinite;
+      transform: skewX(-20deg);
+    }
+
+    .submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(95, 114, 189, 0.3);
+    }
+
+    .submit-btn:active {
+      transform: translateY(0);
+    }
+
+    .message {
+      text-align: center;
+      margin-top: 1rem;
+      padding: 0.5rem;
+      border-radius: 8px;
+      font-weight: 500;
+      min-height: 2.5rem;
+    }
+
+    .message.error {
+      background: rgba(231, 76, 60, 0.1);
+      color: #e74c3c;
+    }
+
+    .message.success {
+      background: rgba(46, 204, 113, 0.1);
+      color: #2ecc71;
     }
 
     @keyframes fadeIn {
@@ -304,361 +385,246 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    .checkbox-container {
-      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-      border-radius: 20px;
-      padding: 1.5rem;
-      border: 1px solid rgba(0, 0, 0, 0.05);
-    }
-
-    .checkbox-group {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 1rem;
-    }
-
-    .checkbox-option {
-      display: flex;
-      align-items: center;
-      cursor: pointer;
-      padding: 1rem;
-      border-radius: 12px;
-      transition: all 0.3s ease;
-      background: rgba(255, 255, 255, 0.8);
-      border: 2px solid transparent;
-    }
-
-    .checkbox-option:hover {
-      background: rgba(255, 255, 255, 1);
-      transform: translateY(-1px);
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    .checkbox-option input[type="checkbox"] {
-      width: 1.2rem;
-      height: 1.2rem;
-      margin-right: 0.8rem;
-      accent-color: #0071e3;
-      cursor: pointer;
-    }
-
-    .checkbox-option input[type="checkbox"]:checked + .checkbox-text {
-      color: #0071e3;
-      font-weight: 700;
-    }
-
-    .checkbox-option.checked {
-      background: rgba(0, 113, 227, 0.1);
-      border-color: #0071e3;
-    }
-
-    .checkbox-text {
-      font-size: 0.95rem;
-      font-weight: 600;
-      color: #1d1d1f;
-      transition: color 0.3s ease;
-    }
-
-    .submit-btn {
-      background: linear-gradient(135deg, #007aff 0%, #0051d5 100%);
-      color: #fff;
-      border: none;
-      border-radius: 18px;
-      padding: 1.3rem 2rem;
-      font-size: 1.1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      width: 100%;
-      margin-top: 1.5rem;
-      box-shadow: 0 8px 16px rgba(0, 122, 255, 0.3);
-    }
-
-    .submit-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 12px 24px rgba(0, 122, 255, 0.4);
-    }
-
-    .submit-btn:active {
-      transform: translateY(0);
-    }
-
-    .submit-btn:disabled {
-      background: #86868b;
-      cursor: not-allowed;
-      transform: none;
-      box-shadow: none;
-    }
-
-    .message {
-      text-align: center;
-      font-size: 1rem;
-      font-weight: 600;
-      color: #0071e3;
-      min-height: 1.5rem;
-      margin-top: 1rem;
-    }
-
-    .message.error {
-      color: #ff3b30;
-    }
-
-    .message.success {
-      color: #34c759;
-    }
-
-    .hint {
-      color: #ff3b30;
-      font-size: 0.85rem;
-      margin-top: 0.5rem;
-      display: none;
-    }
-
-    /* Responsive Design */
     @media (max-width: 768px) {
-      body {
-        padding: 1rem;
-      }
-
       .container {
-        padding: 2rem 1.5rem;
-        border-radius: 20px;
+        padding: 3rem 2rem;
+        margin: 1rem;
       }
-
-      h1 {
-        font-size: 1.8rem;
-      }
-
-      .form-group {
-        margin-bottom: 1.5rem;
-      }
-
+      
       .radio-group {
-        grid-template-columns: 1fr;
-      }
-
-      .radio-option {
-        flex-direction: row;
-        justify-content: flex-start;
-        text-align: left;
-        padding: 1rem;
-      }
-
-      .radio-option input[type="radio"] {
-        margin-right: 1rem;
-        margin-bottom: 0;
-      }
-
-      .qr-controls {
         flex-direction: column;
       }
-    }
-
-    @media (max-width: 480px) {
-      .container {
-        padding: 1.5rem 1rem;
-        border-radius: 16px;
+      
+      .radio-option {
+        width: 100%;
       }
-
-      h1 {
-        font-size: 1.6rem;
-      }
-
-      .submit-btn {
-        padding: 1.1rem 1.5rem;
+      
+      .checkbox-group {
+        grid-template-columns: 1fr;
       }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="header">
-      <h1>平板借還系統</h1>
-      <div class="datetime" id="datetime"></div>
-      <div class="subtitle">掃描QR碼或手動輸入學生資訊進行平板借還登記</div>
-    </div>
-
-    <form id="borrowForm" autocomplete="off">
+    <h1>平板借還系統</h1>
+    <div class="timestamp" id="timestamp"></div>
+    <div class="subtitle">掃描QR碼或手動輸入學生資訊進行平板借還登記</div>
+    
+    <form id="borrowForm">
       <!-- 操作類型 -->
-      <div class="form-group">
-        <label>操作類型</label>
-        <div class="radio-container">
-          <div class="radio-group">
-            <label class="radio-option">
-              <input type="radio" name="operation" value="借出" required>
-              <span>借出平板</span>
+      <div class="form-section">
+        <div class="form-section-title">操作類型</div>
+        <div class="radio-group">
+          <div class="radio-option" onclick="selectOption(this)">
+            <input type="radio" id="borrow" name="operation" value="borrow" required>
+            <label for="borrow">
+              <span class="icon">📱</span>
+              借出平板
             </label>
-            <label class="radio-option">
-              <input type="radio" name="operation" value="歸還">
-              <span>歸還平板</span>
+          </div>
+          <div class="radio-option" onclick="selectOption(this)">
+            <input type="radio" id="return" name="operation" value="return" required>
+            <label for="return">
+              <span class="icon">🔄</span>
+              歸還平板
             </label>
           </div>
         </div>
       </div>
-
-      <!-- QR碼掃描區域 -->
-      <div class="form-group">
-        <label>學生資訊</label>
+      
+      <!-- 學生資訊 -->
+      <div class="form-section">
+        <div class="form-section-title">學生資訊</div>
+        
         <div class="qr-section">
-          <div class="qr-controls">
-            <button type="button" class="qr-btn" id="startQrBtn">開始掃描QR碼</button>
-            <button type="button" class="qr-btn stop" id="stopQrBtn" style="display:none;">停止掃描</button>
+          <div class="qr-buttons">
+            <button type="button" id="startQrBtn" class="qr-btn">開始掃描QR碼</button>
+            <button type="button" id="stopQrBtn" class="qr-btn">停止掃描</button>
           </div>
-          <video id="qr-video" autoplay muted playsinline></video>
-          <div class="qr-result" id="qr-result">
-            <div class="qr-result-text" id="qr-result-text"></div>
+          <video id="qr-video"></video>
+          <div id="qr-result">
+            <span id="qr-result-text"></span>
           </div>
         </div>
-      </div>
-
-      <!-- 學生姓名 -->
-      <div class="form-group">
-        <label for="studentName">
-          學生姓名
-          <span class="label-tip">可通過QR碼自動填入</span>
-        </label>
-        <input name="studentName" id="studentName" required placeholder="請輸入學生姓名或掃描QR碼">
-      </div>
-
-      <!-- 序號 -->
-      <div class="form-group">
-        <label for="studentId">
-          序號
-          <span class="label-tip">可通過QR碼自動填入</span>
-        </label>
-        <input name="studentId" id="studentId" required placeholder="請輸入序號">
+        
+        <!-- 學生姓名 -->
+        <div class="form-group">
+          <label for="studentName">學生姓名 <small>可通過QR碼自動填入</small></label>
+          <input type="text" id="studentName" name="studentName" placeholder="請輸入學生姓名或掃描QR碼" required>
+        </div>
+        
+        <!-- 序號 -->
+        <div class="form-group">
+          <label for="studentId">序號 <small>可通過QR碼自動填入</small></label>
+          <input type="text" id="studentId" name="studentId" placeholder="請輸入序號" required>
+        </div>
       </div>
 
       <!-- 其他問題 -->
-      <div class="form-group">
-        <label>其他問題</label>
-        <div class="checkbox-container">
-          <div class="checkbox-group">
-            <label class="checkbox-option">
-              <input type="checkbox" name="issues" value="電池不足">
-              <span class="checkbox-text">🔋 電池不足</span>
-            </label>
-            <label class="checkbox-option">
-              <input type="checkbox" name="issues" value="無法開機">
-              <span class="checkbox-text">⚡ 無法開機</span>
-            </label>
-            <label class="checkbox-option">
-              <input type="checkbox" name="issues" value="WiFi連接問題">
-              <span class="checkbox-text">📶 WiFi連接問題</span>
-            </label>
-            <label class="checkbox-option">
-              <input type="checkbox" name="issues" value="音訊問題">
-              <span class="checkbox-text">🔊 音訊問題</span>
-            </label>
-            <label class="checkbox-option">
-              <input type="checkbox" name="issues" value="顯示異常">
-              <span class="checkbox-text">📱 顯示異常</span>
-            </label>
-            <label class="checkbox-option">
-              <input type="checkbox" name="issues" value="硬體損壞">
-              <span class="checkbox-text">🔧 硬體損壞</span>
-            </label>
+      <div class="form-section">
+        <div class="form-section-title">其他問題</div>
+        <div class="checkbox-group">
+          <div class="checkbox-option">
+            <input type="checkbox" id="issue1" name="issues" value="電池不足">
+            <label for="issue1">🔋 電池不足</label>
           </div>
-          <div class="other-issue-input" style="margin-top: 1rem;">
-            <label for="customIssue" style="font-size: 0.9rem; color: #666; margin-bottom: 0.5rem;">其他問題說明：</label>
-            <textarea name="customIssue" id="customIssue" placeholder="如有其他問題請在此描述..." style="min-height: 60px;"></textarea>
+          <div class="checkbox-option">
+            <input type="checkbox" id="issue2" name="issues" value="無法開機">
+            <label for="issue2">⚡ 無法開機</label>
+          </div>
+          <div class="checkbox-option">
+            <input type="checkbox" id="issue3" name="issues" value="WiFi連接問題">
+            <label for="issue3">📶 WiFi連接問題</label>
+          </div>
+          <div class="checkbox-option">
+            <input type="checkbox" id="issue4" name="issues" value="音訊問題">
+            <label for="issue4">🔊 音訊問題</label>
+          </div>
+          <div class="checkbox-option">
+            <input type="checkbox" id="issue5" name="issues" value="顯示異常">
+            <label for="issue5">📱 顯示異常</label>
+          </div>
+          <div class="checkbox-option">
+            <input type="checkbox" id="issue6" name="issues" value="硬體損壞">
+            <label for="issue6">🔧 硬體損壞</label>
           </div>
         </div>
+        <div class="form-group">
+          <label for="customIssue">其他問題說明：</label>
+          <textarea id="customIssue" name="customIssue" placeholder="如有其他問題請在此描述..."></textarea>
+        </div>
       </div>
-
+      
       <!-- 備註 -->
-      <div class="form-group">
-        <label for="remark">備註</label>
-        <textarea name="remark" id="remark" placeholder="其他需要說明的事項"></textarea>
+      <div class="form-section">
+        <div class="form-section-title">備註</div>
+        <div class="form-group">
+          <textarea id="remarks" name="remarks" placeholder="其他備註信息..."></textarea>
+        </div>
       </div>
-
-      <!-- 提交按鈕 -->
-      <button type="submit" class="submit-btn" id="submitBtn">提交記錄</button>
-      <div class="message" id="message"></div>
+      
+      <button type="submit" id="submitBtn" class="submit-btn">提交記錄</button>
+      <div id="message" class="message"></div>
     </form>
   </div>
 
   <script>
-    // 配置
-    const apiUrl = "https://script.google.com/macros/s/AKfycbyzpkStBPKwBtcEhUKGlTWM8CBECZnb7PgUxCEc1WzwzOumATVwm_Tm-YDD-6hzstXY/exec";
+    // 設置API URL
+    const apiUrl = "https://script.google.com/macros/s/AKfycbwHfbnR8gz7gP-ddvO81joSSAMBxcvYUHTRfdOrJYlUrVjQN6JXtsdr36ZvrEYRYvin/exec";
     
-    let codeReader = null;
-    let selectedDeviceId = null;
-    let isScanning = false;
-
-    // 實時時鐘
-    function updateTime() {
+    // 顯示當前日期和時間
+    function updateTimestamp() {
       const now = new Date();
-      const formatter = (num) => String(num).padStart(2, '0');
-      document.getElementById("datetime").textContent =
-        `${now.getFullYear()}/${formatter(now.getMonth() + 1)}/${formatter(now.getDate())} ${formatter(now.getHours())}:${formatter(now.getMinutes())}:${formatter(now.getSeconds())}`;
+      const options = { 
+        year: 'numeric', 
+        month: '2-digit', 
+        day: '2-digit',
+        hour: '2-digit', 
+        minute: '2-digit', 
+        second: '2-digit',
+        hour12: false
+      };
+      document.getElementById('timestamp').textContent = now.toLocaleString('zh-TW', options);
     }
-    setInterval(updateTime, 1000);
-    updateTime();
-
-    // 單選按鈕互動
-    document.querySelectorAll('input[name="operation"]').forEach(radio => {
-      radio.addEventListener('change', function() {
-        document.querySelectorAll('.radio-option').forEach(option => {
-          option.classList.remove('selected');
-        });
-        this.closest('.radio-option').classList.add('selected');
+    
+    // 初始化並每秒更新時間
+    updateTimestamp();
+    setInterval(updateTimestamp, 1000);
+    
+    // 選擇操作類型
+    function selectOption(element) {
+      // 移除所有選項的選中狀態
+      document.querySelectorAll('.radio-option').forEach(option => {
+        option.classList.remove('selected');
       });
-    });
-
-    // QR碼掃描功能
-    document.getElementById('startQrBtn').addEventListener('click', startQrScanner);
-    document.getElementById('stopQrBtn').addEventListener('click', stopQrScanner);
-
-    async function startQrScanner() {
+      
+      // 添加選中狀態到當前選項
+      element.classList.add('selected');
+      
+      // 選中單選按鈕
+      const radio = element.querySelector('input[type="radio"]');
+      radio.checked = true;
+    }
+    
+    // QR碼掃描相關變量
+    let codeReader;
+    let isScanning = false;
+    
+    // 開始QR碼掃描
+    document.getElementById('startQrBtn').addEventListener('click', async function() {
       try {
         const startBtn = document.getElementById('startQrBtn');
         const stopBtn = document.getElementById('stopQrBtn');
         const video = document.getElementById('qr-video');
-        const message = document.getElementById('message');
-
-        // 初始化ZXing庫
-        if (!codeReader) {
-          codeReader = new ZXing.BrowserQRCodeReader();
-        }
-
-        // 獲取攝像頭設備
-        const videoInputDevices = await codeReader.listVideoInputDevices();
         
-        if (videoInputDevices.length === 0) {
-          throw new Error('找不到攝像頭設備');
-        }
-
-        // 選擇後置攝像頭（如果有）
-        selectedDeviceId = videoInputDevices.find(device => 
-          device.label.toLowerCase().includes('back') || 
-          device.label.toLowerCase().includes('rear')
-        )?.deviceId || videoInputDevices[0].deviceId;
-
-        // 顯示視頻和控制按鈕
-        video.style.display = 'block';
+        if (isScanning) return;
+        isScanning = true;
+        
         startBtn.style.display = 'none';
         stopBtn.style.display = 'inline-block';
-        isScanning = true;
-
-        message.textContent = '正在啟動攝像頭...';
-        message.classList.remove('error');
-
-        // 開始掃描
-        const result = await codeReader.decodeOnceFromVideoDevice(selectedDeviceId, 'qr-video');
+        video.style.display = 'block';
         
-        if (result && isScanning) {
-          handleQrResult(result.text);
-          stopQrScanner();
+        showMessage('正在啟動攝像頭...');
+        
+        // 初始化QR碼掃描器
+        codeReader = new ZXing.BrowserMultiFormatReader();
+        
+        // 獲取可用的視頻設備
+        const videoInputDevices = await ZXing.BrowserMultiFormatReader.listVideoInputDevices();
+        
+        // 優先選擇後置攝像頭（適用於iPad）
+        let selectedDeviceId = null;
+        
+        if (videoInputDevices.length > 0) {
+          // 嘗試找到後置攝像頭
+          for (const device of videoInputDevices) {
+            if (device.label.toLowerCase().includes('back') || 
+                device.label.toLowerCase().includes('後') || 
+                device.label.toLowerCase().includes('rear')) {
+              selectedDeviceId = device.deviceId;
+              break;
+            }
+          }
+          
+          // 如果沒有找到後置攝像頭，使用第一個可用的攝像頭
+          if (!selectedDeviceId) {
+            selectedDeviceId = videoInputDevices[0].deviceId;
+          }
         }
+        
+        // 開始解碼
+        const constraints = selectedDeviceId 
+          ? { video: { deviceId: selectedDeviceId } } 
+          : { video: { facingMode: 'environment' } };
+        
+        await codeReader.decodeFromConstraints(
+          constraints,
+          'qr-video',
+          (result, err) => {
+            if (err) {
+              // 忽略錯誤，繼續掃描
+              return;
+            }
+            
+            if (result) {
+              // 處理掃描結果
+              handleQrResult(result.text);
+              stopQrScanner();
+            }
+          }
+        );
 
       } catch (error) {
         console.error('QR掃描錯誤:', error);
         showMessage('攝像頭啟動失敗：' + error.message, 'error');
         stopQrScanner();
       }
-    }
-
+    });
+    
+    // 停止QR碼掃描
+    document.getElementById('stopQrBtn').addEventListener('click', stopQrScanner);
+    
     function stopQrScanner() {
       const startBtn = document.getElementById('startQrBtn');
       const stopBtn = document.getElementById('stopQrBtn');
@@ -676,7 +642,8 @@
       
       showMessage('', '');
     }
-
+    
+    // 處理QR碼掃描結果
     function handleQrResult(qrText) {
       try {
         // 嘗試解析JSON格式的QR碼
@@ -686,19 +653,18 @@
           studentData = JSON.parse(qrText);
         } catch (e) {
           // 如果不是JSON，嘗試其他格式
-          // 假設格式為：姓名|學號|班級
+          // 假設格式為：姓名|序號
           const parts = qrText.split('|');
-          if (parts.length >= 3) {
+          if (parts.length >= 2) {
             studentData = {
               name: parts[0],
-              studentId: parts[1],
-              class: parts[2]
+              studentId: parts[1]
             };
           } else {
             throw new Error('QR碼格式不正確');
           }
         }
-
+        
         // 填入表單
         if (studentData.name) {
           document.getElementById('studentName').value = studentData.name;
@@ -706,30 +672,28 @@
         if (studentData.studentId) {
           document.getElementById('studentId').value = studentData.studentId;
         }
-        if (studentData.class) {
-          document.getElementById('grade').value = studentData.class;
-        }
-
+        
         // 顯示結果
         const resultDiv = document.getElementById('qr-result');
         const resultText = document.getElementById('qr-result-text');
-        resultText.textContent = `✅ 已讀取：${studentData.name || ''} (${studentData.studentId || ''}) ${studentData.class || ''}`;
+        resultText.textContent = `✅ 已讀取：${studentData.name || ''} (${studentData.studentId || ''})`;
         resultDiv.classList.add('show');
-
+        
         showMessage('QR碼掃描成功！', 'success');
-
+        
       } catch (error) {
         console.error('QR碼解析錯誤:', error);
         showMessage('QR碼格式錯誤，請手動輸入學生資訊', 'error');
       }
     }
-
+    
+    // 顯示訊息
     function showMessage(text, type = '') {
       const message = document.getElementById('message');
       message.textContent = text;
       message.className = 'message' + (type ? ' ' + type : '');
     }
-
+    
     // 表單提交
     document.getElementById('borrowForm').addEventListener('submit', async function(e) {
       e.preventDefault();
@@ -767,24 +731,24 @@
       const message = document.getElementById('message');
       const submitBtn = document.getElementById('submitBtn');
       let isTimeout = false;
-
+      
       // 停止QR掃描（如果正在進行）
       if (isScanning) {
         stopQrScanner();
       }
-
+      
       // 禁用提交按鈕並顯示載入狀態
       submitBtn.disabled = true;
       submitBtn.textContent = '提交中...';
       showMessage('請稍候... 正在提交中');
-
+      
       const timeoutId = setTimeout(() => {
         isTimeout = true;
         showMessage('伺服器繁忙，請稍後再試', 'error');
         submitBtn.disabled = false;
         submitBtn.textContent = '提交記錄';
       }, 15000);
-
+      
       try {
         const response = await fetch(apiUrl, { 
           method: 'POST', 
@@ -824,7 +788,7 @@
         submitBtn.textContent = '提交記錄';
       }
     });
-
+    
     // 頁面載入完成後的初始化
     document.addEventListener('DOMContentLoaded', function() {
       // 檢查是否支援攝像頭
