@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <title>平板借還系統</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="https://unpkg.com/@zxing/library@latest"></script>
+  <script src="https://unpkg.com/@zxing/library@0.21.0"></script>
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Arial, '微軟正黑體', sans-serif;
@@ -64,7 +64,7 @@
     .form-section {margin-bottom: 1.7rem; border-radius: 16px; padding: 1.3rem; background: rgba(240, 240, 255, 0.5); border: 1px solid rgba(200, 200, 255, 0.3);}
     .form-section-title {font-size: 1.2rem; font-weight: 600; margin-bottom: 1.2rem; color: #5f72bd; border-bottom: 2px solid rgba(95, 114, 189, 0.17); padding-bottom: 0.5rem;}
     .radio-group {display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem;}
-    .radio-option {flex: 1; min-width: 140px; background: white; border: 2px solid rgba(95, 114, 189, 0.18); border-radius: 12px; padding: 1rem; text-align: center; cursor: pointer; transition: all 0.3s ease;}
+    .radio-option {flex: 1; min-width: 140px; background: white; border: 2px solid rgba(95, 114, 189, 0.18); border-radius: 12px; padding: 1rem; text-align: center; cursor: pointer; transition: all 0.3s ease; position: relative;}
     .radio-option.selected {border-color: #5f72bd; background: rgba(95, 114, 189, 0.05);}
     .radio-option input {position: absolute; opacity: 0;}
     .radio-option label {cursor: pointer; font-weight: 500;}
@@ -277,39 +277,37 @@
       const radio = element.querySelector('input[type="radio"]');
       radio.checked = true;
     }
+    // ========== 掃描 QR Code 穩定版 =============
     let codeReader, isScanning = false;
     document.getElementById('startQrBtn').addEventListener('click', async function() {
       try {
+        if (isScanning) return;
+        isScanning = true;
         const startBtn = document.getElementById('startQrBtn');
         const stopBtn = document.getElementById('stopQrBtn');
         const video = document.getElementById('qr-video');
-        if (isScanning) return;
-        isScanning = true;
+        showMessage(LANG_TEXT[currLang].cameraNotSupport, 'success');
         startBtn.style.display = 'none';
         stopBtn.style.display = 'inline-block';
         video.style.display = 'block';
-        showMessage('...');
+        showMessage('正在啟動攝像頭...');
         codeReader = new ZXing.BrowserMultiFormatReader();
-        const videoInputDevices = await ZXing.BrowserMultiFormatReader.listVideoInputDevices();
-        let selectedDeviceId = null;
-        if (videoInputDevices.length > 0) {
-          for (const device of videoInputDevices) {
-            if (device.label.toLowerCase().includes('back') || device.label.toLowerCase().includes('後') || device.label.toLowerCase().includes('rear')) {
-              selectedDeviceId = device.deviceId; break;
+        await codeReader.decodeFromConstraints(
+          { video: { facingMode: 'environment' } },
+          'qr-video',
+          (result, err) => {
+            if (err) {
+              // 非致命性錯誤
+              return;
+            }
+            if (result) {
+              handleQrResult(result.text);
+              stopQrScanner();
             }
           }
-          if (!selectedDeviceId) selectedDeviceId = videoInputDevices[0].deviceId;
-        }
-        const constraints = selectedDeviceId ? { video: { deviceId: selectedDeviceId } } : { video: { facingMode: 'environment' } };
-        await codeReader.decodeFromConstraints(constraints, 'qr-video', (result, err) => {
-          if (err) return;
-          if (result) {
-            handleQrResult(result.text);
-            stopQrScanner();
-          }
-        });
+        );
       } catch (error) {
-        showMessage('Error: ' + error.message, 'error');
+        showMessage(`攝像頭啟動失敗：${error.name} - ${error.message}`, 'error');
         stopQrScanner();
       }
     });
@@ -326,7 +324,7 @@
       showMessage('', '');
     }
     function handleQrResult(qrText) {
-      alert(qrText); // 掃到即時彈原文
+      alert(qrText); // 即時彈出原文
       try {
         let studentData;
         try { studentData = JSON.parse(qrText); }
@@ -375,7 +373,7 @@
         submitBtn.textContent = t.submit;
       }, 15000);
       try {
-        const apiUrl = "https://script.google.com/macros/s/AKfycbwHfbnR8gz7gP-ddvO81joSSAMBxcvYUHTRfdOrJYlUrVjQN6JXtsdr36ZvrEYRYvin/exec";
+        const apiUrl = "https://script.google.com/macros/s/AKfycbyHxzaSOTV42VjzLa_oHND7RFBy3xXT1B9AMXVhNdDpQHRMY1KrGvvAx_5o4CAsafE/exec";
         const response = await fetch(apiUrl, { method: 'POST', body: formData });
         const text = await response.text();
         if (isTimeout) return;
