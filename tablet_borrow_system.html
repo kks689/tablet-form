@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <title>平板借還系統</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="https://unpkg.com/@zxing/library@latest"></script>
+  <script src="https://unpkg.com/@zxing/library@0.21.0"></script>
   <style>
     *, *::before, *::after {
       margin: 0;
@@ -452,39 +452,34 @@
     let isScanning = false;
     document.getElementById('startQrBtn').addEventListener('click', async function() {
       try {
+        if (isScanning) return;
+        isScanning = true;
         const startBtn = document.getElementById('startQrBtn');
         const stopBtn = document.getElementById('stopQrBtn');
         const video = document.getElementById('qr-video');
-        if (isScanning) return;
-        isScanning = true;
+        showMessage('請確保已授予相機權限', 'success');
         startBtn.style.display = 'none';
         stopBtn.style.display = 'inline-block';
         video.style.display = 'block';
         showMessage('正在啟動攝像頭...');
         codeReader = new ZXing.BrowserMultiFormatReader();
-        const videoInputDevices = await ZXing.BrowserMultiFormatReader.listVideoInputDevices();
-        let selectedDeviceId = null;
-        if (videoInputDevices.length > 0) {
-          for (const device of videoInputDevices) {
-            if (device.label.toLowerCase().includes('back') || device.label.toLowerCase().includes('後') || device.label.toLowerCase().includes('rear')) {
-              selectedDeviceId = device.deviceId;
-              break;
+        await codeReader.decodeFromConstraints(
+          { video: { facingMode: 'environment' } },
+          'qr-video',
+          (result, err) => {
+            if (err) {
+              console.error('Decode error:', err);
+              return;
+            }
+            if (result) {
+              handleQrResult(result.text);
+              stopQrScanner();
             }
           }
-          if (!selectedDeviceId) selectedDeviceId = videoInputDevices[0].deviceId;
-        }
-        const constraints = selectedDeviceId 
-          ? { video: { deviceId: selectedDeviceId } } 
-          : { video: { facingMode: 'environment' } };
-        await codeReader.decodeFromConstraints(constraints, 'qr-video', (result, err) => {
-          if (err) return;
-          if (result) {
-            handleQrResult(result.text);
-            stopQrScanner();
-          }
-        });
+        );
       } catch (error) {
-        showMessage('攝像頭啟動失敗：' + error.message, 'error');
+        showMessage(`攝像頭啟動失敗：${error.name} - ${error.message}`, 'error');
+        console.error('QR Scanner Error:', error);
         stopQrScanner();
       }
     });
