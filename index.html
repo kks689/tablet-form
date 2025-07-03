@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>QR 借還掃描</title>
+  <script src="https://unpkg.com/html5-qrcode"></script>
+</head>
+<body>
+  <h3>請掃描 QR Code</h3>
+  <div id="reader" style="width:300px"></div>
+  <div id="result"></div>
+  <script>
+    function onScanSuccess(qrCodeMessage) {
+      document.getElementById('result').innerText = "掃描結果：" + qrCodeMessage;
+      // 掃到後呼叫 Apps Script API
+      fetch("https://script.google.com/macros/s/AKfycbyTVi7lsjHUmf3tjyf9gU-jr7OHuhydN8irYuDOaco5Jwr1TUqFBeDKsZT63KTUdUtr6A/exec", {
+        method: "POST",
+        body: JSON.stringify({ data: qrCodeMessage }),
+        headers: { "Content-Type": "application/json" }
+      }).then(res => res.text()).then(r => {
+        alert("已寫入Google Sheet: " + r);
+      });
+    }
+    let html5QrcodeScanner = new Html5QrcodeScanner(
+      "reader", { fps: 10, qrbox: 250 });
+    html5QrcodeScanner.render(onScanSuccess);
+  </script>
+</body>
+</html>
