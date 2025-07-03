@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>學生QR碼生成器</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+  <style>
+    /* Reset and Base Styles */
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Arial, '微軟正黑體', sans-serif;
+      background: 
+        url('cyberpunk_background.png'),
+        linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background-size: 400px 400px, cover;
+      background-repeat: repeat, no-repeat;
+      background-blend-mode: overlay;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 2rem 1rem;
+      color: #1d1d1f;
+      line-height: 1.7;
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.1) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .container {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border-radius: 28px;
+      padding: 3rem 2.5rem;
+      max-width: 800px;
+      width: 100%;
+      box-shadow: 
+        0 32px 64px rgba(0, 0, 0, 0.15),
+        0 16px 32px rgba(0, 0, 0, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8),
+        0 0 0 1px rgba(120, 119, 198, 0.2),
+        0 0 20px rgba(120, 219, 255, 0.1);
+      position: relative;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .container::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: linear-gradient(45deg, 
+        rgba(120, 119, 198, 0.3) 0%, 
+        rgba(255, 119, 198, 0.2) 25%, 
+        rgba(120, 219, 255, 0.3) 50%, 
+        rgba(120, 119, 198, 0.2) 75%, 
+        rgba(255, 119, 198, 0.3) 100%);
+      border-radius: 30px;
+      z-index: -1;
+      animation: cyberpunkGlow 3s ease-in-out infinite alternate;
+    }
+
+    @keyframes cyberpunkGlow {
+      0% {
+        opacity: 0.5;
+        filter: blur(1px);
+      }
+      100% {
+        opacity: 0.8;
+        filter: blur(2px);
+      }
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: #1d1d1f;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.02em;
+    }
+
+    .subtitle {
+      font-size: 1rem;
+      color: #6e6e73;
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+
+    .nav-link {
+      display: inline-block;
+      background: rgba(0, 113, 227, 0.1);
+      color: #0071e3;
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      margin-top: 1rem;
+    }
+
+    .nav-link:hover {
+      background: rgba(0, 113, 227, 0.2);
+      transform: translateY(-1px);
+    }
+
+    .form-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    label {
+      display: block;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #1d1d1f;
+      margin-bottom: 0.8rem;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 1rem;
+      border: 2px solid #e5e5e7;
+      border-radius: 12px;
+      font-size: 1rem;
+      background: #fff;
+      transition: all 0.3s ease;
+      font-family: inherit;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: #0071e3;
+      box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1);
+    }
+
+    .btn {
+      background: linear-gradient(135deg, #007aff 0%, #0051d5 100%);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 1rem 2rem;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-right: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 12px rgba(0, 122, 255, 0.3);
+    }
+
+    .btn.secondary {
+      background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+    }
+
+    .btn.success {
+      background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+    }
+
+    .qr-display {
+      text-align: center;
+      padding: 2rem;
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      border-radius: 20px;
+      margin-bottom: 2rem;
+    }
+
+    #qrcode {
+      margin: 1rem auto;
+      display: inline-block;
+      padding: 1rem;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .qr-info {
+      background: rgba(0, 113, 227, 0.1);
+      border: 1px solid rgba(0, 113, 227, 0.2);
+      border-radius: 12px;
+      padding: 1rem;
+      margin-top: 1rem;
+      font-size: 0.9rem;
+      color: #0071e3;
+    }
+
+    .batch-section {
+      background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+      border: 1px solid rgba(255, 193, 7, 0.3);
+      border-radius: 20px;
+      padding: 2rem;
+      margin-top: 2rem;
+    }
+
+    .batch-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #856404;
+      margin-bottom: 1rem;
+    }
+
+    .csv-input {
+      width: 100%;
+      min-height: 150px;
+      padding: 1rem;
+      border: 2px solid #ffc107;
+      border-radius: 12px;
+      font-family: monospace;
+      font-size: 0.9rem;
+      background: rgba(255, 255, 255, 0.8);
+      resize: vertical;
+    }
+
+    .csv-example {
+      background: rgba(255, 255, 255, 0.8);
+      border-radius: 8px;
+      padding: 1rem;
+      margin: 1rem 0;
+      font-family: monospace;
+      font-size: 0.85rem;
+      color: #495057;
+      border-left: 4px solid #ffc107;
+    }
+
+    .download-area {
+      display: none;
+      text-align: center;
+      margin-top: 2rem;
+    }
+
+    .download-area.show {
+      display: block;
+    }
+
+    .zip-download {
+      background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+      color: white;
+      text-decoration: none;
+      padding: 1rem 2rem;
+      border-radius: 12px;
+      font-weight: 600;
+      display: inline-block;
+      transition: all 0.3s ease;
+    }
+
+    .zip-download:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 12px rgba(23, 162, 184, 0.3);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .form-section {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+
+      .container {
+        padding: 2rem 1.5rem;
+      }
+
+      h1 {
+        font-size: 1.8rem;
+      }
+
+      .btn {
+        width: 100%;
+        margin-right: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>學生QR碼生成器</h1>
+      <div class="subtitle">為學生生成QR碼，用於平板借還系統快速識別</div>
+      <a href="tablet_borrow_system.html" class="nav-link">← 返回借還系統</a>
+    </div>
+
+    <!-- 單個QR碼生成 -->
+    <div class="form-section">
+      <div>
+        <h3 style="margin-bottom: 1.5rem; color: #1d1d1f;">單個學生QR碼</h3>
+        
+        <div class="form-group">
+          <label for="studentName">學生姓名</label>
+          <input type="text" id="studentName" placeholder="請輸入學生姓名">
+        </div>
+
+        <div class="form-group">
+          <label for="studentId">序號</label>
+          <input type="text" id="studentId" placeholder="請輸入序號">
+        </div>
+
+        <button class="btn" onclick="generateSingleQR()">生成QR碼</button>
+        <button class="btn secondary" onclick="clearForm()">清除</button>
+      </div>
+
+      <div class="qr-display">
+        <h4 style="margin-bottom: 1rem; color: #1d1d1f;">QR碼預覽</h4>
+        <div id="qrcode"></div>
+        <div class="qr-info" id="qrInfo" style="display: none;">
+          <strong>QR碼資訊：</strong><br>
+          <span id="qrInfoText"></span>
+        </div>
+        <button class="btn success" id="downloadBtn" onclick="downloadQR()" style="display: none;">下載QR碼</button>
+      </div>
+    </div>
+
+    <!-- 批次生成 -->
+    <div class="batch-section">
+      <div class="batch-title">批次生成QR碼</div>
+      <p style="margin-bottom: 1rem; color: #856404;">
+        輸入多個學生資訊，一次生成所有QR碼並打包下載
+      </p>
+
+      <div class="csv-example">
+        <strong>格式範例：</strong><br>
+        張三,S001<br>
+        李四,S002<br>
+        王五,S003
+      </div>
+
+      <div class="form-group">
+        <label for="csvInput">學生資料 (姓名,序號)</label>
+        <textarea id="csvInput" class="csv-input" placeholder="請按照格式輸入學生資料，每行一個學生：&#10;張三,S001&#10;李四,S002&#10;王五,S003"></textarea>
+      </div>
+
+      <button class="btn" onclick="generateBatchQR()">批次生成QR碼</button>
+      <button class="btn secondary" onclick="clearBatch()">清除</button>
+
+      <div class="download-area" id="downloadArea">
+        <h4 style="margin-bottom: 1rem; color: #856404;">批次下載</h4>
+        <p style="margin-bottom: 1rem; color: #856404;">QR碼已生成完成，點擊下載ZIP檔案</p>
+        <a href="#" class="zip-download" id="zipDownload">下載所有QR碼 (ZIP)</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentQRData = null;
+    let batchQRData = [];
+
+    // 生成單個QR碼
+    async function generateSingleQR() {
+      const name = document.getElementById('studentName').value.trim();
+      const studentId = document.getElementById('studentId').value.trim();
+
+      if (!name || !studentId) {
+        alert('請填寫完整的學生資訊');
+        return;
+      }
+
+      const studentData = {
+        name: name,
+        studentId: studentId,
+        type: 'student'
+      };
+
+      const qrText = JSON.stringify(studentData);
+      currentQRData = { data: studentData, qrText: qrText };
+
+      try {
+        // 清除舊的QR碼
+        document.getElementById('qrcode').innerHTML = '';
+        
+        // 生成新的QR碼
+        await QRCode.toCanvas(document.getElementById('qrcode'), qrText, {
+          width: 200,
+          margin: 2,
+          color: {
+            dark: '#000000',
+            light: '#FFFFFF'
+          }
+        });
+
+        // 顯示資訊
+        document.getElementById('qrInfo').style.display = 'block';
+        document.getElementById('qrInfoText').innerHTML = 
+          `姓名: ${name}<br>學號: ${studentId}<br>班級: ${grade}`;
+        
+        document.getElementById('downloadBtn').style.display = 'inline-block';
+
+      } catch (error) {
+        console.error('QR碼生成失敗:', error);
+        alert('QR碼生成失敗，請重試');
+      }
+    }
+
+    // 下載單個QR碼
+    function downloadQR() {
+      if (!currentQRData) {
+        alert('請先生成QR碼');
+        return;
+      }
+
+      const canvas = document.querySelector('#qrcode canvas');
+      if (!canvas) {
+        alert('找不到QR碼，請重新生成');
+        return;
+      }
+
+      // 創建下載連結
+      const link = document.createElement('a');
+      link.download = `QR_${currentQRData.data.name}_${currentQRData.data.studentId}.png`;
+      link.href = canvas.toDataURL();
+      link.click();
+    }
+
+    // 批次生成QR碼
+    async function generateBatchQR() {
+      const csvText = document.getElementById('csvInput').value.trim();
+      
+      if (!csvText) {
+        alert('請輸入學生資料');
+        return;
+      }
+
+      const lines = csvText.split('\n').filter(line => line.trim());
+      batchQRData = [];
+
+      try {
+        for (const line of lines) {
+          const parts = line.split(',').map(part => part.trim());
+          
+          if (parts.length !== 2) {
+            throw new Error(`格式錯誤：${line}`);
+          }
+
+          const [name, studentId] = parts;
+          
+          if (!name || !studentId) {
+            throw new Error(`資料不完整：${line}`);
+          }
+
+          const studentData = {
+            name: name,
+            studentId: studentId,
+            type: 'student'
+          };
+
+          const qrText = JSON.stringify(studentData);
+          
+          // 生成QR碼為base64
+          const qrDataURL = await QRCode.toDataURL(qrText, {
+            width: 300,
+            margin: 2,
+            color: {
+              dark: '#000000',
+              light: '#FFFFFF'
+            }
+          });
+
+          batchQRData.push({
+            data: studentData,
+            qrText: qrText,
+            dataURL: qrDataURL,
+            filename: `QR_${name}_${studentId}.png`
+          });
+        }
+
+        // 創建ZIP下載
+        await createZipDownload();
+        
+        document.getElementById('downloadArea').classList.add('show');
+        alert(`成功生成 ${batchQRData.length} 個QR碼！`);
+
+      } catch (error) {
+        console.error('批次生成失敗:', error);
+        alert('批次生成失敗：' + error.message);
+      }
+    }
+
+    // 創建ZIP下載
+    async function createZipDownload() {
+      // 使用簡單的方式創建多個下載連結
+      // 由於瀏覽器限制，我們改為逐個下載的方式
+      const zipLink = document.getElementById('zipDownload');
+      zipLink.onclick = function(e) {
+        e.preventDefault();
+        downloadAllQRCodes();
+      };
+    }
+
+    // 下載所有QR碼（逐個下載）
+    function downloadAllQRCodes() {
+      if (batchQRData.length === 0) {
+        alert('沒有QR碼可下載');
+        return;
+      }
+
+      let downloadCount = 0;
+      const downloadNext = () => {
+        if (downloadCount >= batchQRData.length) {
+          alert(`所有 ${batchQRData.length} 個QR碼已下載完成！`);
+          return;
+        }
+
+        const qrData = batchQRData[downloadCount];
+        const link = document.createElement('a');
+        link.download = qrData.filename;
+        link.href = qrData.dataURL;
+        link.click();
+
+        downloadCount++;
+        
+        // 延遲下載下一個，避免瀏覽器阻擋
+        setTimeout(downloadNext, 500);
+      };
+
+      downloadNext();
+    }
+
+    // 清除單個表單
+    function clearForm() {
+      document.getElementById('studentName').value = '';
+      document.getElementById('studentId').value = '';
+      document.getElementById('qrcode').innerHTML = '';
+      document.getElementById('qrInfo').style.display = 'none';
+      document.getElementById('downloadBtn').style.display = 'none';
+      currentQRData = null;
+    }
+
+    // 清除批次表單
+    function clearBatch() {
+      document.getElementById('csvInput').value = '';
+      document.getElementById('downloadArea').classList.remove('show');
+      batchQRData = [];
+    }
+
+    // 頁面載入完成後的初始化
+    document.addEventListener('DOMContentLoaded', function() {
+      // 初始化空的QR碼顯示區域
+      document.getElementById('qrcode').innerHTML = '<div style="width: 200px; height: 200px; background: #f0f0f0; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #999;">QR碼將顯示在這裡</div>';
+    });
+  </script>
+</body>
+</html>
+
