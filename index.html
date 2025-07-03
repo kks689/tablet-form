@@ -2,28 +2,228 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
-  <title>QR 借還掃描</title>
-  <script src="https://unpkg.com/html5-qrcode"></script>
+  <title>平板借還系統</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    /* Reset and Base Styles */
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Arial, '微軟正黑體', sans-serif;
+      background: 
+        url('cyberpunk_background.png'),
+        linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background-size: 400px 400px, cover;
+      background-repeat: repeat, no-repeat;
+      background-blend-mode: overlay;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 3rem 2rem;
+      color: #1d1d1f;
+      line-height: 1.7;
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.1) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .container {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border-radius: 28px;
+      padding: 4rem 3.5rem;
+      max-width: 600px;
+      width: 100%;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      position: relative;
+      overflow: hidden;
+      z-index: 1;
+      text-align: center;
+    }
+
+    .container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        linear-gradient(45deg, rgba(255, 255, 255, 0) 40%, rgba(255, 255, 255, 0.3) 50%, rgba(255, 255, 255, 0) 60%);
+      z-index: -1;
+      animation: shimmer 3s infinite;
+      transform: skewX(-20deg);
+    }
+
+    @keyframes shimmer {
+      0% { transform: translateX(-150%) skewX(-20deg); }
+      100% { transform: translateX(150%) skewX(-20deg); }
+    }
+
+    h1 {
+      font-size: 2.8rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      background: linear-gradient(135deg, #5f72bd 0%, #9b23ea 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      position: relative;
+    }
+
+    .subtitle {
+      font-size: 1.2rem;
+      color: #666;
+      margin-bottom: 3rem;
+    }
+
+    .features {
+      background: rgba(95, 114, 189, 0.05);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 3rem;
+      text-align: left;
+      border-left: 4px solid #5f72bd;
+    }
+
+    .features h2 {
+      color: #5f72bd;
+      margin-bottom: 1rem;
+      font-size: 1.4rem;
+    }
+
+    .features ul {
+      list-style-type: none;
+    }
+
+    .features li {
+      margin-bottom: 0.8rem;
+      padding-left: 1.5rem;
+      position: relative;
+    }
+
+    .features li::before {
+      content: '✓';
+      position: absolute;
+      left: 0;
+      color: #5f72bd;
+      font-weight: bold;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .btn {
+      flex: 1;
+      background: linear-gradient(135deg, #5f72bd 0%, #9b23ea 100%);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 1.2rem 2rem;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-block;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(45deg, rgba(255, 255, 255, 0) 40%, rgba(255, 255, 255, 0.3) 50%, rgba(255, 255, 255, 0) 60%);
+      z-index: 1;
+      animation: shimmer 3s infinite;
+      transform: skewX(-20deg);
+    }
+
+    .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 20px rgba(95, 114, 189, 0.3);
+    }
+
+    .btn.secondary {
+      background: white;
+      color: #5f72bd;
+      border: 2px solid #5f72bd;
+    }
+
+    .btn.secondary:hover {
+      background: rgba(95, 114, 189, 0.05);
+    }
+
+    .note {
+      font-size: 0.9rem;
+      color: #888;
+      margin-top: 2rem;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 3rem 2rem;
+        margin: 1rem;
+      }
+      
+      h1 {
+        font-size: 2.2rem;
+      }
+      
+      .btn-group {
+        flex-direction: column;
+      }
+    }
+  </style>
 </head>
 <body>
-  <h3>請掃描 QR Code</h3>
-  <div id="reader" style="width:300px"></div>
-  <div id="result"></div>
-  <script>
-    function onScanSuccess(qrCodeMessage) {
-      document.getElementById('result').innerText = "掃描結果：" + qrCodeMessage;
-      // 掃到後呼叫 Apps Script API
-      fetch("https://script.google.com/macros/s/AKfycbyTVi7lsjHUmf3tjyf9gU-jr7OHuhydN8irYuDOaco5Jwr1TUqFBeDKsZT63KTUdUtr6A/exec", {
-        method: "POST",
-        body: JSON.stringify({ data: qrCodeMessage }),
-        headers: { "Content-Type": "application/json" }
-      }).then(res => res.text()).then(r => {
-        alert("已寫入Google Sheet: " + r);
-      });
-    }
-    let html5QrcodeScanner = new Html5QrcodeScanner(
-      "reader", { fps: 10, qrbox: 250 });
-    html5QrcodeScanner.render(onScanSuccess);
-  </script>
+  <div class="container">
+    <h1>平板借還系統</h1>
+    <p class="subtitle">簡化設備管理，提升工作效率</p>
+    
+    <div class="features">
+      <h2>系統功能</h2>
+      <ul>
+        <li>QR碼掃描學生資訊</li>
+        <li>自動日期時間記錄</li>
+        <li>借出/歸還狀態管理</li>
+        <li>常見問題快速選擇</li>
+        <li>資料同步到Google Sheets</li>
+      </ul>
+    </div>
+    
+    <div class="btn-group">
+      <a href="tablet_borrow_system.html" class="btn">進入借還系統</a>
+      <a href="qr_generator.html" class="btn secondary">QR碼生成器</a>
+    </div>
+    
+    <p class="note">請先設置Google Apps Script後端，詳見使用說明</p>
+  </div>
 </body>
 </html>
+

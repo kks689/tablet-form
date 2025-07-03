@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>學生QR碼生成器</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+  <style>
+    /* Reset and Base Styles */
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Arial, '微軟正黑體', sans-serif;
+      background: 
+        url('cyberpunk_background.png'),
+        linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background-size: 400px 400px, cover;
+      background-repeat: repeat, no-repeat;
+      background-blend-mode: overlay;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 3rem 2rem;
+      color: #1d1d1f;
+      line-height: 1.7;
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.1) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .container {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border-radius: 28px;
+      padding: 4rem 3.5rem;
+      max-width: 800px;
+      width: 100%;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      position: relative;
+      overflow: hidden;
+      z-index: 1;
+    }
+
+    .container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        linear-gradient(45deg, rgba(255, 255, 255, 0) 40%, rgba(255, 255, 255, 0.3) 50%, rgba(255, 255, 255, 0) 60%);
+      z-index: -1;
+      animation: shimmer 3s infinite;
+      transform: skewX(-20deg);
+    }
+
+    @keyframes shimmer {
+      0% { transform: translateX(-150%) skewX(-20deg); }
+      100% { transform: translateX(150%) skewX(-20deg); }
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      text-align: center;
+      background: linear-gradient(135deg, #5f72bd 0%, #9b23ea 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      position: relative;
+    }
+
+    .subtitle {
+      text-align: center;
+      font-size: 1rem;
+      color: #666;
+      margin-bottom: 2.5rem;
+    }
+
+    .tabs {
+      display: flex;
+      margin-bottom: 2rem;
+      border-bottom: 2px solid rgba(95, 114, 189, 0.2);
+    }
+
+    .tab {
+      padding: 1rem 2rem;
+      cursor: pointer;
+      font-weight: 600;
+      color: #666;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    .tab.active {
+      color: #5f72bd;
+    }
+
+    .tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: #5f72bd;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+      animation: fadeIn 0.5s ease;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: #444;
+    }
+
+    .form-group input[type="text"],
+    .form-group textarea {
+      width: 100%;
+      padding: 1rem;
+      border: 2px solid rgba(95, 114, 189, 0.2);
+      border-radius: 12px;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      background: white;
+    }
+
+    .form-group input[type="text"]:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: #5f72bd;
+      box-shadow: 0 0 0 3px rgba(95, 114, 189, 0.1);
+    }
+
+    .form-group textarea {
+      min-height: 150px;
+      resize: vertical;
+    }
+
+    .btn {
+      background: linear-gradient(135deg, #5f72bd 0%, #9b23ea 100%);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 1rem 2rem;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-right: 1rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(45deg, rgba(255, 255, 255, 0) 40%, rgba(255, 255, 255, 0.3) 50%, rgba(255, 255, 255, 0) 60%);
+      z-index: 1;
+      animation: shimmer 3s infinite;
+      transform: skewX(-20deg);
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(95, 114, 189, 0.3);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn.secondary {
+      background: white;
+      color: #5f72bd;
+      border: 2px solid #5f72bd;
+    }
+
+    .btn.secondary:hover {
+      background: rgba(95, 114, 189, 0.05);
+    }
+
+    .qr-preview {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 2rem;
+      padding: 2rem;
+      border-radius: 16px;
+      background: rgba(240, 240, 255, 0.5);
+      border: 1px solid rgba(200, 200, 255, 0.3);
+    }
+
+    .qr-preview h3 {
+      margin-bottom: 1rem;
+      color: #5f72bd;
+    }
+
+    .qr-preview canvas {
+      margin-bottom: 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .qr-preview p {
+      margin-bottom: 1.5rem;
+      color: #666;
+      text-align: center;
+    }
+
+    .csv-example {
+      background: rgba(95, 114, 189, 0.05);
+      border-radius: 12px;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+      font-family: monospace;
+      color: #444;
+    }
+
+    .csv-example code {
+      white-space: pre;
+    }
+
+    .batch-preview {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .batch-item {
+      background: white;
+      border-radius: 12px;
+      padding: 1rem;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .batch-item canvas {
+      margin-bottom: 0.5rem;
+      border-radius: 4px;
+    }
+
+    .batch-item p {
+      font-size: 0.9rem;
+      text-align: center;
+      color: #666;
+      margin: 0;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-top: 2rem;
+      color: #5f72bd;
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+
+    .back-link:hover {
+      color: #9b23ea;
+      text-decoration: underline;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 3rem 2rem;
+        margin: 1rem;
+      }
+      
+      .tabs {
+        flex-direction: column;
+      }
+      
+      .tab {
+        padding: 0.8rem 1rem;
+      }
+      
+      .batch-preview {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>學生QR碼生成器</h1>
+    <div class="subtitle">為學生生成QR碼，用於平板借還系統</div>
+    
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('single')">單個生成</div>
+      <div class="tab" onclick="switchTab('batch')">批次生成</div>
+    </div>
+    
+    <div id="single-tab" class="tab-content active">
+      <div class="form-group">
+        <label for="studentName">學生姓名</label>
+        <input type="text" id="studentName" placeholder="請輸入學生姓名">
+      </div>
+      
+      <div class="form-group">
+        <label for="studentId">序號</label>
+        <input type="text" id="studentId" placeholder="請輸入序號">
+      </div>
+      
+      <button class="btn" onclick="generateSingleQR()">生成QR碼</button>
+      <button class="btn secondary" onclick="clearForm()">清除</button>
+      
+      <div id="qr-preview" class="qr-preview" style="display: none;">
+        <h3>QR碼預覽</h3>
+        <canvas id="qr-canvas"></canvas>
+        <p id="qr-data"></p>
+        <button class="btn" onclick="downloadQR()">下載QR碼</button>
+      </div>
+    </div>
+    
+    <div id="batch-tab" class="tab-content">
+      <div class="csv-example">
+        <p>請按以下格式輸入學生資料（每行一筆）：</p>
+        <code>姓名,序號
+張小明,S001
+李小華,S002
+王大偉,S003</code>
+      </div>
+      
+      <div class="form-group">
+        <label for="batchData">學生資料</label>
+        <textarea id="batchData" placeholder="請輸入學生資料，格式如上..."></textarea>
+      </div>
+      
+      <button class="btn" onclick="generateBatchQR()">批次生成QR碼</button>
+      <button class="btn secondary" onclick="clearBatchForm()">清除</button>
+      
+      <div id="batch-preview" class="batch-preview"></div>
+      
+      <div id="batch-download" style="display: none; margin-top: 2rem; text-align: center;">
+        <button class="btn" onclick="downloadAllQR()">下載所有QR碼 (ZIP)</button>
+      </div>
+    </div>
+    
+    <a href="tablet_borrow_system.html" class="back-link">← 返回平板借還系統</a>
+  </div>
+
+  <script>
+    // 切換標籤頁
+    function switchTab(tabId) {
+      // 隱藏所有標籤內容
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+      });
+      
+      // 移除所有標籤的活動狀態
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      
+      // 顯示選中的標籤內容
+      document.getElementById(tabId + '-tab').classList.add('active');
+      
+      // 設置選中標籤的活動狀態
+      document.querySelectorAll('.tab').forEach(tab => {
+        if (tab.textContent.includes(tabId === 'single' ? '單個' : '批次')) {
+          tab.classList.add('active');
+        }
+      });
+    }
+    
+    // 生成單個QR碼
+    async function generateSingleQR() {
+      const name = document.getElementById('studentName').value.trim();
+      const studentId = document.getElementById('studentId').value.trim();
+      
+      if (!name || !studentId) {
+        alert('請輸入學生姓名和序號');
+        return;
+      }
+      
+      // 創建QR碼數據
+      const qrData = JSON.stringify({
+        name: name,
+        studentId: studentId,
+        type: "student"
+      });
+      
+      // 顯示QR碼預覽區域
+      const preview = document.getElementById('qr-preview');
+      preview.style.display = 'flex';
+      
+      // 顯示數據
+      document.getElementById('qr-data').textContent = `${name} (${studentId})`;
+      
+      // 生成QR碼
+      const canvas = document.getElementById('qr-canvas');
+      await QRCode.toCanvas(canvas, qrData, {
+        width: 200,
+        margin: 1,
+        color: {
+          dark: '#5f72bd',
+          light: '#ffffff'
+        }
+      });
+    }
+    
+    // 下載單個QR碼
+    function downloadQR() {
+      const canvas = document.getElementById('qr-canvas');
+      const name = document.getElementById('studentName').value.trim();
+      const studentId = document.getElementById('studentId').value.trim();
+      
+      if (!canvas) return;
+      
+      // 創建下載連結
+      const link = document.createElement('a');
+      link.download = `QR_${name}_${studentId}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }
+    
+    // 清除單個表單
+    function clearForm() {
+      document.getElementById('studentName').value = '';
+      document.getElementById('studentId').value = '';
+      document.getElementById('qr-preview').style.display = 'none';
+    }
+    
+    // 批次生成QR碼
+    async function generateBatchQR() {
+      const batchData = document.getElementById('batchData').value.trim();
+      
+      if (!batchData) {
+        alert('請輸入學生資料');
+        return;
+      }
+      
+      // 解析CSV數據
+      const lines = batchData.split('\n');
+      const students = [];
+      
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (!line) continue;
+        
+        // 跳過標題行
+        if (i === 0 && line.includes('姓名') && line.includes('序號')) {
+          continue;
+        }
+        
+        const parts = line.split(',');
+        if (parts.length >= 2) {
+          students.push({
+            name: parts[0].trim(),
+            studentId: parts[1].trim()
+          });
+        }
+      }
+      
+      if (students.length === 0) {
+        alert('未找到有效的學生資料');
+        return;
+      }
+      
+      // 清空預覽區域
+      const previewArea = document.getElementById('batch-preview');
+      previewArea.innerHTML = '';
+      
+      // 生成每個學生的QR碼
+      for (const student of students) {
+        // 創建QR碼數據
+        const qrData = JSON.stringify({
+          name: student.name,
+          studentId: student.studentId,
+          type: "student"
+        });
+        
+        // 創建預覽項目
+        const item = document.createElement('div');
+        item.className = 'batch-item';
+        
+        // 創建QR碼
+        const canvas = document.createElement('canvas');
+        await QRCode.toCanvas(canvas, qrData, {
+          width: 120,
+          margin: 1,
+          color: {
+            dark: '#5f72bd',
+            light: '#ffffff'
+          }
+        });
+        
+        // 創建學生信息
+        const info = document.createElement('p');
+        info.textContent = `${student.name} (${student.studentId})`;
+        
+        // 添加到預覽項目
+        item.appendChild(canvas);
+        item.appendChild(info);
+        
+        // 添加到預覽區域
+        previewArea.appendChild(item);
+      }
+      
+      // 顯示下載按鈕
+      document.getElementById('batch-download').style.display = 'block';
+    }
+    
+    // 下載所有QR碼（ZIP）
+    async function downloadAllQR() {
+      const batchData = document.getElementById('batchData').value.trim();
+      
+      if (!batchData) {
+        alert('請輸入學生資料');
+        return;
+      }
+      
+      // 解析CSV數據
+      const lines = batchData.split('\n');
+      const students = [];
+      
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (!line) continue;
+        
+        // 跳過標題行
+        if (i === 0 && line.includes('姓名') && line.includes('序號')) {
+          continue;
+        }
+        
+        const parts = line.split(',');
+        if (parts.length >= 2) {
+          students.push({
+            name: parts[0].trim(),
+            studentId: parts[1].trim()
+          });
+        }
+      }
+      
+      if (students.length === 0) {
+        alert('未找到有效的學生資料');
+        return;
+      }
+      
+      // 創建ZIP文件
+      const zip = new JSZip();
+      
+      // 為每個學生生成QR碼並添加到ZIP
+      for (const student of students) {
+        // 創建QR碼數據
+        const qrData = JSON.stringify({
+          name: student.name,
+          studentId: student.studentId,
+          type: "student"
+        });
+        
+        // 創建臨時Canvas
+        const canvas = document.createElement('canvas');
+        await QRCode.toCanvas(canvas, qrData, {
+          width: 300,
+          margin: 1,
+          color: {
+            dark: '#5f72bd',
+            light: '#ffffff'
+          }
+        });
+        
+        // 轉換Canvas為Blob
+        const blob = await new Promise(resolve => {
+          canvas.toBlob(resolve, 'image/png');
+        });
+        
+        // 添加到ZIP
+        zip.file(`QR_${student.name}_${student.studentId}.png`, blob);
+      }
+      
+      // 生成並下載ZIP
+      const zipBlob = await zip.generateAsync({type: 'blob'});
+      saveAs(zipBlob, 'student_qr_codes.zip');
+    }
+    
+    // 清除批次表單
+    function clearBatchForm() {
+      document.getElementById('batchData').value = '';
+      document.getElementById('batch-preview').innerHTML = '';
+      document.getElementById('batch-download').style.display = 'none';
+    }
+  </script>
+</body>
+</html>
+
