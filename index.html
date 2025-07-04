@@ -8,7 +8,7 @@
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Arial, '微軟正黑體', sans-serif;
-      background: url('cyberpunk_background.png'), linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: url('cyberpunk_background.png' ), linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       background-size: 400px 400px, cover;
       background-repeat: repeat, no-repeat;
       background-blend-mode: overlay;
@@ -248,6 +248,11 @@
       applyLang();
     }
     window.switchLang = switchLang;
+
+    let codeReader = null; // 在全域範圍初始化為 null
+    let isScanning = false;
+    let currentControls = null; // 用於儲存 ZXing 返回的 controls 物件
+
     window.onload = function() {
       applyLang();
       updateTimestamp();
@@ -264,32 +269,43 @@
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         document.getElementById('startQrBtn').disabled = true;
         document.getElementById('startQrBtn').textContent = LANG_TEXT[currLang].cameraNotSupport;
+      } else {
+        // 在這裡初始化 codeReader 一次，作為單例
+        codeReader = new ZXing.BrowserMultiFormatReader();
       }
     };
+
     function updateTimestamp() {
       const now = new Date();
       const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
       document.getElementById('timestamp').textContent = now.toLocaleString(currLang === "zh" ? "zh-TW" : "en-US", options);
     }
+
     function selectOption(element) {
       document.querySelectorAll('.radio-option').forEach(option => option.classList.remove('selected'));
       element.classList.add('selected');
       const radio = element.querySelector('input[type="radio"]');
       radio.checked = true;
     }
-    let codeReader, isScanning = false;
+
     document.getElementById('startQrBtn').addEventListener('click', async function() {
       try {
         const startBtn = document.getElementById('startQrBtn');
         const stopBtn = document.getElementById('stopQrBtn');
         const video = document.getElementById('qr-video');
-        if (isScanning) return;
+
+        if (isScanning) return; // 如果已經在掃描，則不執行任何操作
+        if (!codeReader) { // 如果 codeReader 未初始化，可能是因為攝像頭不支援
+            showMessage(LANG_TEXT[currLang].cameraNotSupport, 'error');
+            return;
+        }
+
         isScanning = true;
         startBtn.style.display = 'none';
         stopBtn.style.display = 'inline-block';
         video.style.display = 'block';
         showMessage('...');
-        codeReader = new ZXing.BrowserMultiFormatReader();
+
         const videoInputDevices = await ZXing.BrowserMultiFormatReader.listVideoInputDevices();
         let selectedDeviceId = null;
         if (videoInputDevices.length > 0) {
@@ -301,39 +317,73 @@
           if (!selectedDeviceId) selectedDeviceId = videoInputDevices[0].deviceId;
         }
         const constraints = selectedDeviceId ? { video: { deviceId: selectedDeviceId } } : { video: { facingMode: 'environment' } };
-        await codeReader.decodeFromConstraints(constraints, 'qr-video', (result, err) => {
-          if (err) return;
+
+        // 使用現有的 codeReader 實例，並將返回的 controls 物件儲存起來
+        currentControls = await codeReader.decodeFromConstraints(constraints, 'qr-video', (result, err) => {
+          if (err) {
+            // 處理錯誤，例如顯示錯誤訊息，但不要停止掃描，讓它繼續嘗試
+            console.error("QR Scan Error:", err);
+            // 如果是 NotAllowedError，可以提示用戶權限問題
+            if (err.name === 'NotAllowedError') {
+                showMessage('請允許瀏覽器使用攝像頭', 'error');
+            } else if (err.name === 'NotFoundError') {
+                showMessage('未找到攝像頭', 'error');
+            }
+            return; // 不停止掃描，讓它繼續嘗試解碼
+          }
           if (result) {
             handleQrResult(result.text);
-            stopQrScanner();
+            stopQrScanner(); // 掃描成功後停止掃描
           }
         });
       } catch (error) {
         showMessage('Error: ' + error.message, 'error');
-        stopQrScanner();
+        console.error("Start QR Scan Failed:", error);
+        stopQrScanner(); // 發生錯誤時停止掃描
       }
     });
+
     document.getElementById('stopQrBtn').addEventListener('click', stopQrScanner);
+
     function stopQrScanner() {
       const startBtn = document.getElementById('startQrBtn');
       const stopBtn = document.getElementById('stopQrBtn');
       const video = document.getElementById('qr-video');
+
       isScanning = false;
-      if (codeReader) codeReader.reset();
+      if (codeReader) {
+        codeReader.reset(); // 重置讀取器，停止解碼
+      }
+      if (currentControls && typeof currentControls.stop === 'function') {
+        currentControls.stop(); // 停止攝像頭串流
+        currentControls = null; // 清空 controls
+      }
+
       video.style.display = 'none';
       startBtn.style.display = 'inline-block';
       stopBtn.style.display = 'none';
       showMessage('', '');
+
+      // 短暫禁用開始按鈕，給攝像頭資源釋放時間
+      startBtn.disabled = true;
+      setTimeout(() => {
+        startBtn.disabled = false;
+      }, 1000); // 延遲 1 秒
     }
+
     function handleQrResult(qrText) {
       alert(qrText); // 掃到即時彈原文
       try {
         let studentData;
-        try { studentData = JSON.parse(qrText); }
-        catch (e) {
+        try {
+          studentData = JSON.parse(qrText);
+        } catch (e) {
           const parts = qrText.split('|');
-          if (parts.length >= 2) studentData = { name: parts[0], studentId: parts[1] };
-          else throw new Error('QR code format error');
+          if (parts.length >= 2) {
+            studentData = { name: parts[0], studentId: parts[1] };
+          } else {
+            throw new Error('QR code format error');
+          }
         }
         if (studentData.name) document.getElementById('studentName').value = studentData.name;
         if (studentData.studentId) document.getElementById('studentId').value = studentData.studentId;
@@ -342,13 +392,16 @@
         showMessage(LANG_TEXT[currLang].scanSuccess, 'success');
       } catch (error) {
         showMessage(LANG_TEXT[currLang].scanError, 'error');
+        console.error("Handle QR Result Error:", error);
       }
     }
+
     function showMessage(text, type = '') {
       const message = document.getElementById('message');
       message.textContent = text;
       message.className = 'message' + (type ? ' ' + type : '');
     }
+
     document.getElementById('borrowForm').addEventListener('submit', async function(e) {
       e.preventDefault();
       const t = LANG_TEXT[currLang];
@@ -364,7 +417,7 @@
       formData.append('issues', allIssues);
       const submitBtn = document.getElementById('submitBtn');
       let isTimeout = false;
-      if (isScanning) stopQrScanner();
+      if (isScanning) stopQrScanner(); // 提交時停止掃描
       submitBtn.disabled = true;
       submitBtn.textContent = t.submitting;
       showMessage(t.submitting);
@@ -376,7 +429,7 @@
       }, 15000);
       try {
         const apiUrl = "https://script.google.com/macros/s/AKfycbwHfbnR8gz7gP-ddvO81joSSAMBxcvYUHTRfdOrJYlUrVjQN6JXtsdr36ZvrEYRYvin/exec";
-        const response = await fetch(apiUrl, { method: 'POST', body: formData });
+        const response = await fetch(apiUrl, { method: 'POST', body: formData } );
         const text = await response.text();
         if (isTimeout) return;
         clearTimeout(timeoutId);
@@ -391,11 +444,14 @@
             submitBtn.textContent = t.submit;
             showMessage('');
           }, 2500);
-        } else throw new Error('Server Error');
+        } else {
+          throw new Error('Server Error: ' + text); // 顯示伺服器返回的錯誤訊息
+        }
       } catch (error) {
         if (isTimeout) return;
         clearTimeout(timeoutId);
         showMessage(t.submitFail, 'error');
+        console.error("Form Submission Failed:", error);
         submitBtn.disabled = false;
         submitBtn.textContent = t.submit;
       }
