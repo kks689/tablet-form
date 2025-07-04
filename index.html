@@ -375,7 +375,7 @@
         submitBtn.textContent = t.submit;
       }, 15000);
       try {
-        const apiUrl = "https://script.google.com/macros/s/AKfycbwHfbnR8gz7gP-ddvO81joSSAMBxcvYUHTRfdOrJYlUrVjQN6JXtsdr36ZvrEYRYvin/exec";
+        const apiUrl = "https://script.google.com/macros/s/AKfycbxRnVJwUtgMQmaOwtex4f7PdjE7MVefAG5yOz2IoGStGxi-1sFHpNvgd63tPik49_9f/exec";
         const response = await fetch(apiUrl, { method: 'POST', body: formData });
         const text = await response.text();
         if (isTimeout) return;
