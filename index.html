@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
@@ -6,10 +7,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://unpkg.com/@zxing/library@latest"></script>
   <style>
-    /* 你的 style 完全沒變動，省略... */
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Arial, '微軟正黑體', sans-serif;
-      background: url('cyberpunk_background.png' ), linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: url('cyberpunk_background.png'), linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       background-size: 400px 400px, cover;
       background-repeat: repeat, no-repeat;
       background-blend-mode: overlay;
@@ -22,373 +22,68 @@
       line-height: 1.7;
       position: relative;
     }
-    /* ...你其他CSS不變 */
+    .container {
+      background: rgba(255, 255, 255, 0.97);
+      backdrop-filter: blur(20px);
+      border-radius: 28px;
+      padding: 4rem 3.5rem;
+      max-width: 600px;
+      width: 100%;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      position: relative;
+      overflow: hidden;
+      z-index: 1;
+      text-align: center;
+    }
+    /* 其他CSS維持原樣 */
   </style>
 </head>
 <body>
-  <div class="lang-switch">
-    <button class="lang-btn" onclick="switchLang('zh')">中文</button>
-    <button class="lang-btn" onclick="switchLang('en')">English</button>
-  </div>
   <div class="container">
-    <h1 id="mainTitle"></h1>
-    <div class="timestamp" id="timestamp"></div>
-    <div class="subtitle" id="subtitle"></div>
-    <form id="borrowForm">
-      <div class="form-section">
-        <div class="form-section-title" id="opType"></div>
-        <div class="radio-group">
-          <div class="radio-option" onclick="selectOption(this)">
-            <input type="radio" id="borrow" name="operation" value="borrow" required>
-            <label for="borrow" id="borrowLabel">📱</label>
-          </div>
-          <div class="radio-option" onclick="selectOption(this)">
-            <input type="radio" id="return" name="operation" value="return" required>
-            <label for="return" id="returnLabel">🔄</label>
-          </div>
-        </div>
-      </div>
-      <div class="form-section">
-        <div class="form-section-title" id="studentInfoTitle"></div>
-        <div class="qr-section">
-          <div class="qr-buttons">
-            <button type="button" id="startQrBtn" class="qr-btn"></button>
-            <button type="button" id="stopQrBtn" class="qr-btn"></button>
-          </div>
-          <video id="qr-video"></video>
-          <div id="qr-result"><span id="qr-result-text"></span></div>
-        </div>
-        <div class="form-group">
-          <label for="studentName" id="studentNameLabel"></label>
-          <input type="text" id="studentName" name="studentName" required>
-        </div>
-        <div class="form-group">
-          <label for="studentId" id="studentIdLabel"></label>
-          <input type="text" id="studentId" name="studentId" required>
-        </div>
-      </div>
-      <div class="form-section">
-        <div class="form-section-title" id="otherIssuesTitle"></div>
-        <div class="checkbox-group">
-          <div class="checkbox-option"><input type="checkbox" id="issue1" name="issues" value="電池不足"><label for="issue1" id="issue1Label"></label></div>
-          <div class="checkbox-option"><input type="checkbox" id="issue2" name="issues" value="無法開機"><label for="issue2" id="issue2Label"></label></div>
-          <div class="checkbox-option"><input type="checkbox" id="issue3" name="issues" value="WiFi連接問題"><label for="issue3" id="issue3Label"></label></div>
-          <div class="checkbox-option"><input type="checkbox" id="issue4" name="issues" value="音訊問題"><label for="issue4" id="issue4Label"></label></div>
-          <div class="checkbox-option"><input type="checkbox" id="issue5" name="issues" value="顯示異常"><label for="issue5" id="issue5Label"></label></div>
-          <div class="checkbox-option"><input type="checkbox" id="issue6" name="issues" value="硬體損壞"><label for="issue6" id="issue6Label"></label></div>
-        </div>
-        <div class="form-group">
-          <label for="customIssue" id="customIssueLabel"></label>
-          <textarea id="customIssue" name="customIssue"></textarea>
-        </div>
-      </div>
-      <div class="form-section">
-        <div class="form-section-title" id="remarksTitle"></div>
-        <div class="form-group">
-          <textarea id="remarks" name="remarks"></textarea>
-        </div>
-      </div>
-      <button type="submit" id="submitBtn" class="submit-btn"></button>
-      <div id="message" class="message"></div>
-    </form>
+    <h1>平板借還系統</h1>
+    <button id="startQrBtn">開始掃描QR碼</button>
+    <button id="stopQrBtn" style="display:none;">停止掃描</button>
+    <video id="qr-video" style="width:100%;display:none;"></video>
+    <div id="qr-result"></div>
   </div>
   <script>
-    // 雙語定義等都不變，照你原本 code 寫
-    const LANG_TEXT = { /* ...你的原定義... */ 
-      zh: {
-        mainTitle: "平板借還系統",
-        subtitle: "掃描QR碼或手動輸入學生資訊進行平板借還登記",
-        opType: "操作類型",
-        borrow: "借出平板",
-        return: "歸還平板",
-        studentInfoTitle: "學生資訊",
-        startScan: "開始掃描QR碼",
-        stopScan: "停止掃描",
-        studentName: "學生姓名（可通過QR碼自動填入）",
-        studentId: "序號（可通過QR碼自動填入）",
-        otherIssuesTitle: "其他問題",
-        issue1: "🔋 電池不足",
-        issue2: "⚡ 無法開機",
-        issue3: "📶 WiFi連接問題",
-        issue4: "🔊 音訊問題",
-        issue5: "📱 顯示異常",
-        issue6: "🔧 硬體損壞",
-        customIssue: "其他問題說明：",
-        remarksTitle: "備註",
-        submit: "提交記錄",
-        submitting: "請稍候... 正在提交中",
-        busy: "伺服器繁忙，請稍後再試",
-        submitSuccess: "✅ 記錄提交成功！",
-        submitFail: "❌ 提交失敗，請稍後再試",
-        scanSuccess: "QR碼掃描成功！",
-        scanError: "QR碼格式錯誤，請手動輸入學生資訊",
-        cameraNotSupport: "不支援攝像頭"
-      },
-      en: {
-        mainTitle: "Tablet Lending System",
-        subtitle: "Scan QR code or enter student info for tablet borrowing/return",
-        opType: "Operation Type",
-        borrow: "Borrow Tablet",
-        return: "Return Tablet",
-        studentInfoTitle: "Student Info",
-        startScan: "Start QR Scan",
-        stopScan: "Stop Scanning",
-        studentName: "Student Name (auto from QR supported)",
-        studentId: "Student ID (auto from QR supported)",
-        otherIssuesTitle: "Other Issues",
-        issue1: "🔋 Low Battery",
-        issue2: "⚡ Won't Power On",
-        issue3: "📶 WiFi Problem",
-        issue4: "🔊 Audio Problem",
-        issue5: "📱 Display Issue",
-        issue6: "🔧 Hardware Damage",
-        customIssue: "Other issue description:",
-        remarksTitle: "Remarks",
-        submit: "Submit",
-        submitting: "Submitting, please wait...",
-        busy: "Server busy, please try later",
-        submitSuccess: "✅ Record submitted!",
-        submitFail: "❌ Submission failed, please try again",
-        scanSuccess: "QR code scanned!",
-        scanError: "QR format error, please enter info manually",
-        cameraNotSupport: "Camera not supported"
-      }
-    };
-    let currLang = (navigator.language || "en").toLowerCase().includes("zh") ? "zh" : "en";
-    function applyLang() {
-      // ...不變
-      const t = LANG_TEXT[currLang];
-      document.getElementById("mainTitle").innerText = t.mainTitle;
-      document.getElementById("subtitle").innerText = t.subtitle;
-      document.getElementById("opType").innerText = t.opType;
-      document.getElementById("borrowLabel").innerHTML = "📱 " + t.borrow;
-      document.getElementById("returnLabel").innerHTML = "🔄 " + t.return;
-      document.getElementById("studentInfoTitle").innerText = t.studentInfoTitle;
-      document.getElementById("startQrBtn").innerText = t.startScan;
-      document.getElementById("stopQrBtn").innerText = t.stopScan;
-      document.getElementById("studentNameLabel").innerText = t.studentName;
-      document.getElementById("studentIdLabel").innerText = t.studentId;
-      document.getElementById("otherIssuesTitle").innerText = t.otherIssuesTitle;
-      document.getElementById("issue1Label").innerText = t.issue1;
-      document.getElementById("issue2Label").innerText = t.issue2;
-      document.getElementById("issue3Label").innerText = t.issue3;
-      document.getElementById("issue4Label").innerText = t.issue4;
-      document.getElementById("issue5Label").innerText = t.issue5;
-      document.getElementById("issue6Label").innerText = t.issue6;
-      document.getElementById("customIssueLabel").innerText = t.customIssue;
-      document.getElementById("remarksTitle").innerText = t.remarksTitle;
-      document.getElementById("submitBtn").innerText = t.submit;
-    }
-    function switchLang(l) {
-      currLang = l;
-      applyLang();
-    }
-    window.switchLang = switchLang;
+    let codeReader = null;
+    let scanning = false;
 
-    let codeReader = null; // ← 關鍵1：全局初始 null
-    let isScanning = false;
-    let currentControls = null;
+    document.getElementById('startQrBtn').onclick = async () => {
+      if (scanning) return;
+      scanning = true;
+      document.getElementById('startQrBtn').style.display = 'none';
+      document.getElementById('stopQrBtn').style.display = 'inline-block';
+      document.getElementById('qr-video').style.display = 'block';
+      document.getElementById('qr-result').textContent = "";
 
-    window.onload = function() {
-      applyLang();
-      updateTimestamp();
-      setInterval(updateTimestamp, 1000);
-      document.querySelectorAll('.checkbox-option input[type="checkbox"]').forEach(checkbox => {
-        checkbox.addEventListener('change', function() {
-          const option = this.closest('.checkbox-option');
-          if (this.checked) option.classList.add('checked');
-          else option.classList.remove('checked');
-        });
-      });
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        document.getElementById('startQrBtn').disabled = true;
-        document.getElementById('startQrBtn').textContent = LANG_TEXT[currLang].cameraNotSupport;
-      }
-      // ★這裡不用再 new codeReader！
-    };
+      codeReader = new ZXing.BrowserMultiFormatReader();
+      const devices = await ZXing.BrowserMultiFormatReader.listVideoInputDevices();
+      const deviceId = devices[0]?.deviceId;
 
-    function updateTimestamp() {
-      // ...不變
-      const now = new Date();
-      const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
-      document.getElementById('timestamp').textContent = now.toLocaleString(currLang === "zh" ? "zh-TW" : "en-US", options);
-    }
-
-    function selectOption(element) {
-      document.querySelectorAll('.radio-option').forEach(option => option.classList.remove('selected'));
-      element.classList.add('selected');
-      const radio = element.querySelector('input[type="radio"]');
-      radio.checked = true;
-    }
-
-    // ← 關鍵2：每次按開始掃描都 new 一個 ZXing 物件
-    document.getElementById('startQrBtn').addEventListener('click', async function() {
-      try {
-        const startBtn = document.getElementById('startQrBtn');
-        const stopBtn = document.getElementById('stopQrBtn');
-        const video = document.getElementById('qr-video');
-
-        if (isScanning) return;
-
-        codeReader = new ZXing.BrowserMultiFormatReader();
-
-        isScanning = true;
-        startBtn.style.display = 'none';
-        stopBtn.style.display = 'inline-block';
-        video.style.display = 'block';
-        showMessage('...');
-
-        const videoInputDevices = await ZXing.BrowserMultiFormatReader.listVideoInputDevices();
-        let selectedDeviceId = null;
-        if (videoInputDevices.length > 0) {
-          for (const device of videoInputDevices) {
-            if (device.label.toLowerCase().includes('back') || device.label.toLowerCase().includes('後') || device.label.toLowerCase().includes('rear')) {
-              selectedDeviceId = device.deviceId; break;
-            }
-          }
-          if (!selectedDeviceId) selectedDeviceId = videoInputDevices[0].deviceId;
+      codeReader.decodeFromVideoDevice(deviceId, 'qr-video', (result, err) => {
+        if (result) {
+          document.getElementById('qr-result').textContent = result.text;
+          stopScanning();
         }
-        const constraints = selectedDeviceId ? { video: { deviceId: selectedDeviceId } } : { video: { facingMode: 'environment' } };
+      });
+    };
 
-        currentControls = await codeReader.decodeFromConstraints(constraints, 'qr-video', (result, err) => {
-          if (err) {
-            console.error("QR Scan Error:", err);
-            if (err.name === 'NotAllowedError') {
-              showMessage('請允許瀏覽器使用攝像頭', 'error');
-            } else if (err.name === 'NotFoundError') {
-              showMessage('未找到攝像頭', 'error');
-            }
-            return;
-          }
-          if (result) {
-            handleQrResult(result.text);
-            stopQrScanner();
-          }
-        });
-      } catch (error) {
-        showMessage('Error: ' + error.message, 'error');
-        console.error("Start QR Scan Failed:", error);
-        stopQrScanner();
-      }
-    });
+    document.getElementById('stopQrBtn').onclick = () => {
+      stopScanning();
+    };
 
-    // ← 關鍵3：stop 時重設及設 null
-    document.getElementById('stopQrBtn').addEventListener('click', stopQrScanner);
-
-    function stopQrScanner() {
-      const startBtn = document.getElementById('startQrBtn');
-      const stopBtn = document.getElementById('stopQrBtn');
-      const video = document.getElementById('qr-video');
-
-      isScanning = false;
+    function stopScanning() {
       if (codeReader) {
         codeReader.reset();
         codeReader = null;
       }
-      if (currentControls && typeof currentControls.stop === 'function') {
-        currentControls.stop();
-        currentControls = null;
-      }
-
-      video.style.display = 'none';
-      startBtn.style.display = 'inline-block';
-      stopBtn.style.display = 'none';
-      showMessage('', '');
-
-      startBtn.disabled = true;
-      setTimeout(() => {
-        startBtn.disabled = false;
-      }, 1000);
+      scanning = false;
+      document.getElementById('startQrBtn').style.display = 'inline-block';
+      document.getElementById('stopQrBtn').style.display = 'none';
+      document.getElementById('qr-video').style.display = 'none';
     }
-
-    // ...其餘 handleQrResult, showMessage, 表單 submit, 雙語切換等，全部與原本一致
-
-    function handleQrResult(qrText) {
-      alert(qrText);
-      try {
-        let studentData;
-        try {
-          studentData = JSON.parse(qrText);
-        } catch (e) {
-          const parts = qrText.split('|');
-          if (parts.length >= 2) {
-            studentData = { name: parts[0], studentId: parts[1] };
-          } else {
-            throw new Error('QR code format error');
-          }
-        }
-        if (studentData.name) document.getElementById('studentName').value = studentData.name;
-        if (studentData.studentId) document.getElementById('studentId').value = studentData.studentId;
-        document.getElementById('qr-result-text').textContent = `✅ ${studentData.name || ''} (${studentData.studentId || ''})`;
-        document.getElementById('qr-result').classList.add('show');
-        showMessage(LANG_TEXT[currLang].scanSuccess, 'success');
-      } catch (error) {
-        showMessage(LANG_TEXT[currLang].scanError, 'error');
-        console.error("Handle QR Result Error:", error);
-      }
-    }
-
-    function showMessage(text, type = '') {
-      const message = document.getElementById('message');
-      message.textContent = text;
-      message.className = 'message' + (type ? ' ' + type : '');
-    }
-
-    document.getElementById('borrowForm').addEventListener('submit', async function(e) {
-      e.preventDefault();
-      const t = LANG_TEXT[currLang];
-      const checkedIssues = [];
-      document.querySelectorAll('input[name="issues"]:checked').forEach(checkbox => checkedIssues.push(checkbox.value));
-      const customIssue = document.getElementById('customIssue').value.trim();
-      let allIssues = '';
-      if (checkedIssues.length > 0) allIssues = checkedIssues.join('、');
-      if (customIssue) allIssues = allIssues ? allIssues + '、' + customIssue : customIssue;
-      const formData = new FormData(this);
-      formData.delete('issues');
-      formData.delete('customIssue');
-      formData.append('issues', allIssues);
-      const submitBtn = document.getElementById('submitBtn');
-      let isTimeout = false;
-      if (isScanning) stopQrScanner();
-      submitBtn.disabled = true;
-      submitBtn.textContent = t.submitting;
-      showMessage(t.submitting);
-      const timeoutId = setTimeout(() => {
-        isTimeout = true;
-        showMessage(t.busy, 'error');
-        submitBtn.disabled = false;
-        submitBtn.textContent = t.submit;
-      }, 15000);
-      try {
-        const apiUrl = "https://script.google.com/macros/s/AKfycbwHfbnR8gz7gP-ddvO81joSSAMBxcvYUHTRfdOrJYlUrVjQN6JXtsdr36ZvrEYRYvin/exec";
-        const response = await fetch(apiUrl, { method: 'POST', body: formData } );
-        const text = await response.text();
-        if (isTimeout) return;
-        clearTimeout(timeoutId);
-        if (text.trim() === "OK") {
-          showMessage(t.submitSuccess, 'success');
-          this.reset();
-          document.querySelectorAll('.radio-option').forEach(option => option.classList.remove('selected'));
-          document.querySelectorAll('.checkbox-option').forEach(option => option.classList.remove('checked'));
-          document.getElementById('qr-result').classList.remove('show');
-          setTimeout(() => {
-            submitBtn.disabled = false;
-            submitBtn.textContent = t.submit;
-            showMessage('');
-          }, 2500);
-        } else {
-          throw new Error('Server Error: ' + text);
-        }
-      } catch (error) {
-        if (isTimeout) return;
-        clearTimeout(timeoutId);
-        showMessage(t.submitFail, 'error');
-        console.error("Form Submission Failed:", error);
-        submitBtn.disabled = false;
-        submitBtn.textContent = t.submit;
-      }
-    });
-
   </script>
 </body>
 </html>
